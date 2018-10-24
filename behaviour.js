@@ -1,7 +1,39 @@
-var rows = 10;
-var columns = 20;
-var playerPosY, playerPosX;
+const attempts = 10;
+const maxRoomHeight = 10; // Y axis
+const maxRoomWidth = 10; // X axis
+
+const rows = 40; // Y axis
+const columns = 150; // X axis
 var grid;
+
+var playerPosY, playerPosX;
+
+function placeRooms() {
+    for (i = 0; i < attempts; i++) {
+        var randomRow = Math.floor((Math.random() * (rows - 2) + 1));
+        var randomColumn = Math.floor((Math.random() * (columns - 2) + 1));
+
+        var roomHeight = Math.floor(Math.random() * maxRoomHeight);
+        var roomWidth = Math.floor(Math.random() * maxRoomWidth);
+
+        for (y = -roomHeight; y <= roomHeight; y++) {
+            var yOffset = y + randomRow;
+            if (yOffset <= 0 || yOffset >= rows - 1)
+                continue;
+
+            for (x = -roomWidth; x <= roomWidth; x++) {
+                var xOffset = x + randomColumn;
+                if (xOffset <= 0 || xOffset >= columns - 1)
+                    continue;
+
+                if (grid[yOffset][xOffset] !== 'X')
+                    grid[yOffset][xOffset] = '.';
+            }
+        }
+
+        grid[randomRow][randomColumn] = 'X';
+    }
+}
 
 function generateLayout() {
     var grid = [];
@@ -9,10 +41,11 @@ function generateLayout() {
     for (y = 0; y < rows; y++) {
         grid[y] = [];
         for (x = 0; x < columns; x++) {
-            if (y === 0 || y === rows - 1 || x === 0 || x === columns - 1)
+            /*if (y === 0 || y === rows - 1 || x === 0 || x === columns - 1)
                 grid[y][x] = '#';
             else
-                grid[y][x] = '.';
+                grid[y][x] = '.';*/
+            grid[y][x] = '#';
         }
     }
 
@@ -73,6 +106,7 @@ function drawDisplay() {
 window.onload = function () {
     grid = generateLayout();
     setPlayerPos();
+    placeRooms();
     drawDisplay();
     document.onkeydown = function (e) {
         switch (String.fromCharCode(e.keyCode)) {

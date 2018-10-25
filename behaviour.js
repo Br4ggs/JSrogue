@@ -1,6 +1,6 @@
 const attempts = 10;
-const maxRoomHeight = 10; // Y axis
-const maxRoomWidth = 10; // X axis
+const maxRoomHeight = 4; // Y axis
+const maxRoomWidth = 12; // X axis
 
 const rows = 40; // Y axis
 const columns = 150; // X axis
@@ -8,13 +8,25 @@ var grid;
 
 var playerPosY, playerPosX;
 
+function getRandomIntInclusive(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function placeRooms() {
     for (i = 0; i < attempts; i++) {
-        var randomRow = Math.floor((Math.random() * (rows - 2) + 1));
-        var randomColumn = Math.floor((Math.random() * (columns - 2) + 1));
+        /*var roomHeight = Math.floor(Math.random() * maxRoomHeight + 2);
+        var roomWidth = Math.floor(Math.random() * maxRoomWidth + 2);
 
-        var roomHeight = Math.floor(Math.random() * maxRoomHeight);
-        var roomWidth = Math.floor(Math.random() * maxRoomWidth);
+        var randomRow = Math.floor(Math.random() * (rows - (2 + roomHeight)) + (1 + roomHeight));
+        var randomColumn = Math.floor(Math.random() * (columns - 2) + 1);*/
+
+        var roomHeight = getRandomIntInclusive(2, maxRoomHeight);
+        var roomWidth = getRandomIntInclusive(2, maxRoomWidth);
+
+        var randomRow = getRandomIntInclusive(1 + roomHeight, rows - (2 + roomHeight));
+        var randomColumn = getRandomIntInclusive(1 + roomWidth, columns - (2 + roomWidth));
 
         for (y = -roomHeight; y <= roomHeight; y++) {
             var yOffset = y + randomRow;
@@ -93,9 +105,9 @@ function drawDisplay() {
     for (y = 0; y < rows; y++) {
         display[y] = [];
         for (x = 0; x < columns; x++) {
-            if (playerPosY === y && playerPosX === x)
-                display[y][x] = '@';
-            else
+            //if (playerPosY === y && playerPosX === x)
+                //display[y][x] = '@';
+            //else
                 display[y][x] = grid[y][x];
         }
     }

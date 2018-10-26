@@ -41,21 +41,13 @@ function placeRooms() {
     }
 }
 
-    //RECURSIVE BACKTRACKER
-    //pick a location, can be on the edge of the grid or from one of the rooms
-    //pick a direction, left, right, up or down
-    //check if a tile 1 step in that direction exists                                                               ...
-    //from this tile, check if left, right, up and down (discardting the direction you just came from), are walls   .X.
-    //PS: if you want a more square-ish result you want to check the entire square surrounding this tile            ...
-    //if they are, you can place a tile here.
-
 function generatePassageWaysPrim() {
     var randomRow = getRandomIntInclusive(1 , rows - 2);
     var randomColumn = getRandomIntInclusive(1, columns - 2);
 
-    var walls = []; //add wall coordinates to this: [Y coordinate on grid, X coordinate on grid, offset from origin]
+    var walls = []; //add wall coordinates to this: [Y coordinate on grid, X coordinate on grid, direction in relation to origin]
 
-    grid[randomRow][randomColumn] = '.';
+    grid[randomRow][randomColumn] = 'X';
 
     if (randomRow - 1 > 0)
         walls.push([randomRow - 1, randomColumn, 'UP']); // upper wall
@@ -70,16 +62,107 @@ function generatePassageWaysPrim() {
         walls.push([randomRow, randomColumn + 1, 'RIGHT']); // right wall
 
     while (walls.length > 0) {
-        var randomIndex = Math.random() * (walls.length - 1);
+        var randomIndex = getRandomIntInclusive(0, walls.length - 1);
         var randomWall = walls[randomIndex];
 
-        //with direction data, check the tile on the opposite site of the walls origin
-        //also check the 5 surrounding tiles like this if the direction was right:
-        // #    X   X
-        // . -> W   X
-        // #    X   X
-        //the W is the wall that's being checked
-        //the X'es are the aditional tiles that need to be checked
+        var yStart;
+        var xStart;
+
+        var yMax;
+        var xMax;
+
+        switch (randomWall[2]) {
+            case 'UP': // -1, 0
+                yStart = -1;    //  X X X
+                xStart = -1;    //  X W X
+                yMax = 0;       //  # . #
+                xMax = 1;
+                break;
+
+            case 'DOWN': // 1, 0
+                yStart = 0;     //  # . #
+                xStart = -1;    //  X W X
+                yMax = 1;       //  X X X
+                xMax = 1;
+                break;
+
+            case 'LEFT': // 0, -1
+                yStart = -1;    // X X #
+                xStart = -1;    // X W .
+                yMax = 1;       // X X #
+                xMax = 0;
+                break;
+
+            case 'RIGHT': // 0, 1
+                yStart = -1;    // # X X
+                xStart = 0;     // . W X
+                yMax = 1;       // # X X
+                xMax = 1;
+                break;
+        }
+
+        //make sure you check for boundaries
+        var createPassage = true;
+        for (y = yStart; y <= yMax; y++) {
+            for (x = xStart; x <= xMax; x++) {
+                if (y === 0 && x === 0)
+                    continue;
+
+                if (randomWall[0] + y < 1 || randomWall[0] + y > rows - 2)
+                    continue;
+
+                if (randomWall[1] + x < 1 || randomWall[1] + x > columns - 2)
+                    continue;
+
+                if (grid[(randomWall[0] + y)][(randomWall[1] + x)] === '.') {
+                    createPassage = false;
+                }
+            }
+        }
+
+        if (createPassage) {
+            grid[randomWall[0]][randomWall[1]] = '.';
+
+            switch (randomWall[2]) {
+                case 'UP': // dont add bottom wall
+                    if (randomWall[0] - 1 > 0) // upper wall
+                        walls.push([randomWall[0] - 1, randomWall[1], 'UP']);
+                    if (randomWall[1] - 1 > 0) // left wall
+                        walls.push([randomWall[0], randomWall[1] - 1, 'LEFT']);
+                    if (randomWall[1] + 1 < columns - 1) // right wall
+                        walls.push([randomWall[0], randomWall[1] + 1, 'RIGHT']);
+                    break;
+
+                case 'DOWN': // dont add upper wall
+                    if (randomWall[0] + 1 < rows - 1) // lower wall
+                        walls.push([randomWall[0] + 1, randomWall[1], 'DOWN']);
+                    if (randomWall[1] - 1 > 0) // left wall
+                        walls.push([randomWall[0], randomWall[1] - 1, 'LEFT']);
+                    if (randomWall[1] + 1 < columns - 1) // right wall
+                        walls.push([randomWall[0], randomWall[1] + 1, 'RIGHT']);
+                    break;
+
+                case 'LEFT': // dont add right wall
+                    if (randomWall[0] - 1 > 0) // upper wall
+                        walls.push([randomWall[0] - 1, randomWall[1], 'UP']);
+                    if (randomWall[0] + 1 < rows - 1) // lower wall
+                        walls.push([randomWall[0] + 1, randomWall[1], 'DOWN']);
+                    if (randomWall[1] - 1 > 0) // left wall
+                        walls.push([randomWall[0], randomWall[1] - 1, 'LEFT']);
+                    break;
+
+                case 'RIGHT': // dont add left wall
+                    if (randomWall[0] - 1 > 0) // upper wall
+                        walls.push([randomWall[0] - 1, randomWall[1], 'UP']);
+                    if (randomWall[0] + 1 < rows - 1) // lower wall
+                        walls.push([randomWall[0] + 1, randomWall[1], 'DOWN']);
+                    if (randomWall[1] + 1 < columns - 1) // right wall
+                        walls.push([randomWall[0], randomWall[1] + 1, 'RIGHT']);
+                    break;
+            }
+        }
+
+        walls.splice(randomIndex, 1);
     }
 }
 
@@ -150,8 +233,8 @@ function drawDisplay() {
 window.onload = function () {
     grid = generateLayout();
     setPlayerPos();
-    //placeRooms();
-    generatePassageWaysPrim()
+    placeRooms();
+    generatePassageWaysPrim();
     drawDisplay();
     document.onkeydown = function (e) {
         switch (String.fromCharCode(e.keyCode)) {

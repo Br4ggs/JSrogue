@@ -16,12 +16,6 @@ function getRandomIntInclusive(min, max) {
 
 function placeRooms() {
     for (i = 0; i < attempts; i++) {
-        /*var roomHeight = Math.floor(Math.random() * maxRoomHeight + 2);
-        var roomWidth = Math.floor(Math.random() * maxRoomWidth + 2);
-
-        var randomRow = Math.floor(Math.random() * (rows - (2 + roomHeight)) + (1 + roomHeight));
-        var randomColumn = Math.floor(Math.random() * (columns - 2) + 1);*/
-
         var roomHeight = getRandomIntInclusive(2, maxRoomHeight);
         var roomWidth = getRandomIntInclusive(2, maxRoomWidth);
 
@@ -47,16 +41,54 @@ function placeRooms() {
     }
 }
 
+    //RECURSIVE BACKTRACKER
+    //pick a location, can be on the edge of the grid or from one of the rooms
+    //pick a direction, left, right, up or down
+    //check if a tile 1 step in that direction exists                                                               ...
+    //from this tile, check if left, right, up and down (discardting the direction you just came from), are walls   .X.
+    //PS: if you want a more square-ish result you want to check the entire square surrounding this tile            ...
+    //if they are, you can place a tile here.
+
+function generatePassageWaysPrim() {
+    var randomRow = getRandomIntInclusive(1 , rows - 2);
+    var randomColumn = getRandomIntInclusive(1, columns - 2);
+
+    var walls = []; //add wall coordinates to this: [Y coordinate on grid, X coordinate on grid, offset from origin]
+
+    grid[randomRow][randomColumn] = '.';
+
+    if (randomRow - 1 > 0)
+        walls.push([randomRow - 1, randomColumn, 'UP']); // upper wall
+
+    if (randomRow + 1 < rows - 1)
+        walls.push([randomRow + 1, randomColumn, 'DOWN']); // lower wall
+
+    if (randomColumn - 1 > 0)
+        walls.push([randomRow, randomColumn - 1, 'LEFT']); // left wall
+
+    if (randomColumn + 1 < columns - 1)
+        walls.push([randomRow, randomColumn + 1, 'RIGHT']); // right wall
+
+    while (walls.length > 0) {
+        var randomIndex = Math.random() * (walls.length - 1);
+        var randomWall = walls[randomIndex];
+
+        //with direction data, check the tile on the opposite site of the walls origin
+        //also check the 5 surrounding tiles like this if the direction was right:
+        // #    X   X
+        // . -> W   X
+        // #    X   X
+        //the W is the wall that's being checked
+        //the X'es are the aditional tiles that need to be checked
+    }
+}
+
 function generateLayout() {
     var grid = [];
 
     for (y = 0; y < rows; y++) {
         grid[y] = [];
         for (x = 0; x < columns; x++) {
-            /*if (y === 0 || y === rows - 1 || x === 0 || x === columns - 1)
-                grid[y][x] = '#';
-            else
-                grid[y][x] = '.';*/
             grid[y][x] = '#';
         }
     }
@@ -118,7 +150,8 @@ function drawDisplay() {
 window.onload = function () {
     grid = generateLayout();
     setPlayerPos();
-    placeRooms();
+    //placeRooms();
+    generatePassageWaysPrim()
     drawDisplay();
     document.onkeydown = function (e) {
         switch (String.fromCharCode(e.keyCode)) {

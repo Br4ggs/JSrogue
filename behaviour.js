@@ -1,6 +1,8 @@
-const attempts = 10;
+const roomPlacingAttempts = 10;
 const maxRoomHeight = 4; // Y axis
 const maxRoomWidth = 12; // X axis
+
+const trimIterations = 10;
 
 const rows = 40; // Y axis
 const columns = 150; // X axis
@@ -15,7 +17,7 @@ function getRandomIntInclusive(min, max) {
 }
 
 function placeRooms() {
-    for (i = 0; i < attempts; i++) {
+    for (i = 0; i < roomPlacingAttempts; i++) {
         var roomHeight = getRandomIntInclusive(2, maxRoomHeight);
         var roomWidth = getRandomIntInclusive(2, maxRoomWidth);
 
@@ -47,7 +49,7 @@ function generatePassageWaysPrim() {
 
     var walls = []; //add wall coordinates to this: [Y coordinate on grid, X coordinate on grid, direction in relation to origin]
 
-    grid[randomRow][randomColumn] = 'X';
+    grid[randomRow][randomColumn] = '.';
 
     if (randomRow - 1 > 0)
         walls.push([randomRow - 1, randomColumn, 'UP']); // upper wall
@@ -101,7 +103,6 @@ function generatePassageWaysPrim() {
                 break;
         }
 
-        //make sure you check for boundaries
         var createPassage = true;
         for (y = yStart; y <= yMax; y++) {
             for (x = xStart; x <= xMax; x++) {
@@ -163,6 +164,41 @@ function generatePassageWaysPrim() {
         }
 
         walls.splice(randomIndex, 1);
+    }
+}
+
+function trimends() {
+    for (i = 0; i < trimIterations; i++) {
+        var addedWalls = [];
+
+        for (y = 1; y < rows - 1; y++) {
+            for (x = 1; x < columns - 1; x++) {
+                if (grid[y][x] === '.') {
+                    var neighbouringWalls = 0;
+
+                    offsetLoop:
+                    for (offSetY = -1; offSetY < 2; offSetY++) {
+                        for (offSetX = -1; offSetX < 2; offSetX++) {
+
+                            if (offSetY === offSetX || offSetY === -offSetX)
+                                continue;
+
+                            if (grid[y + offSetY][x + offSetX] === '#') {
+                                neighbouringWalls++;
+                                if (neighbouringWalls >= 3) {
+                                    addedWalls.push([y, x]);
+                                    break offsetLoop;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (j = 0; j < addedWalls.length; j++) {
+            grid[addedWalls[j][0]][addedWalls[j][1]] = '#';
+        }
     }
 }
 
@@ -235,6 +271,7 @@ window.onload = function () {
     setPlayerPos();
     placeRooms();
     generatePassageWaysPrim();
+    trimends();
     drawDisplay();
     document.onkeydown = function (e) {
         switch (String.fromCharCode(e.keyCode)) {

@@ -1,4 +1,4 @@
-const roomPlacingAttempts = 10;
+const roomPlacingAttempts = 20;
 const maxRoomHeight = 4; // Y axis
 const maxRoomWidth = 12; // X axis
 
@@ -43,25 +43,46 @@ function placeRooms() {
     }
 }
 
-function generatePassageWaysPrim() {
-    var randomRow = getRandomIntInclusive(1 , rows - 2);
-    var randomColumn = getRandomIntInclusive(1, columns - 2);
+//add method which iterates over grid and creates passages if enough wall in one place is found
+function floodFillMaze() {
+    for (y = 1; y < rows - 1; y++) {
+        xLoop:
+        for (x = 1; x < columns - 1; x++) {
+            if (grid[y][x] === '#') {
+                for (offSetY = -1; offSetY < 2; offSetY++) {
+                    for (offSetX = -1; offSetX < 2; offSetX++) {
+                        if (grid[y + offSetY][x + offSetX] === '.') {
+                            continue xLoop;
+                        }
+                    }
+                }
+
+                generatePassageWaysPrim(y, x);
+            }
+        }
+    }
+}
+
+//add argument for start point
+function generatePassageWaysPrim(row, column) {
+    //var randomRow = getRandomIntInclusive(1 , rows - 2);
+    //var randomColumn = getRandomIntInclusive(1, columns - 2);
 
     var walls = []; //add wall coordinates to this: [Y coordinate on grid, X coordinate on grid, direction in relation to origin]
 
-    grid[randomRow][randomColumn] = '.';
+    grid[row][column] = '.';
 
-    if (randomRow - 1 > 0)
-        walls.push([randomRow - 1, randomColumn, 'UP']); // upper wall
+    if (row - 1 > 0)
+        walls.push([row - 1, column, 'UP']); // upper wall
 
-    if (randomRow + 1 < rows - 1)
-        walls.push([randomRow + 1, randomColumn, 'DOWN']); // lower wall
+    if (row + 1 < rows - 1)
+        walls.push([row + 1, column, 'DOWN']); // lower wall
 
-    if (randomColumn - 1 > 0)
-        walls.push([randomRow, randomColumn - 1, 'LEFT']); // left wall
+    if (column - 1 > 0)
+        walls.push([row, column - 1, 'LEFT']); // left wall
 
-    if (randomColumn + 1 < columns - 1)
-        walls.push([randomRow, randomColumn + 1, 'RIGHT']); // right wall
+    if (column + 1 < columns - 1)
+        walls.push([row, column + 1, 'RIGHT']); // right wall
 
     while (walls.length > 0) {
         var randomIndex = getRandomIntInclusive(0, walls.length - 1);
@@ -162,7 +183,6 @@ function generatePassageWaysPrim() {
                     break;
             }
         }
-
         walls.splice(randomIndex, 1);
     }
 }
@@ -270,8 +290,10 @@ window.onload = function () {
     grid = generateLayout();
     setPlayerPos();
     placeRooms();
-    generatePassageWaysPrim();
-    trimends();
+    //update the creation of passageways so it always generates something for the entire grid.
+    //generatePassageWaysPrim();
+    floodFillMaze();
+    //trimends();
     drawDisplay();
     document.onkeydown = function (e) {
         switch (String.fromCharCode(e.keyCode)) {

@@ -7,6 +7,7 @@ const trimIterations = 10;
 const rows = 40; // Y axis
 const columns = 150; // X axis
 var grid;
+var currentID;
 
 var playerPosY, playerPosX;
 
@@ -17,10 +18,11 @@ function getRandomIntInclusive(min, max) {
 }
 
 function placeRooms() {
+    currentID = 1;
     for (i = 0; i < roomPlacingAttempts; i++) {
+
         var roomHeight = getRandomIntInclusive(2, maxRoomHeight);
         var roomWidth = getRandomIntInclusive(2, maxRoomWidth);
-
         var randomRow = getRandomIntInclusive(1 + roomHeight, rows - (2 + roomHeight));
         var randomColumn = getRandomIntInclusive(1 + roomWidth, columns - (2 + roomWidth));
 
@@ -34,43 +36,40 @@ function placeRooms() {
                 if (xOffset <= 0 || xOffset >= columns - 1)
                     continue;
 
-                if (grid[yOffset][xOffset] !== 'X')
-                    grid[yOffset][xOffset] = '.';
+                if (grid[yOffset][xOffset].symbol !== 'X')
+                    grid[yOffset][xOffset] = { symbol: '.', id: currentID };
             }
         }
 
-        grid[randomRow][randomColumn] = 'X';
+        grid[randomRow][randomColumn] = { symbol: 'X', id: currentID };
+        currentID++;
     }
 }
 
-//add method which iterates over grid and creates passages if enough wall in one place is found
 function floodFillMaze() {
     for (y = 1; y < rows - 1; y++) {
         xLoop:
         for (x = 1; x < columns - 1; x++) {
-            if (grid[y][x] === '#') {
+            if (grid[y][x].symbol === '#') {
                 for (offSetY = -1; offSetY < 2; offSetY++) {
                     for (offSetX = -1; offSetX < 2; offSetX++) {
-                        if (grid[y + offSetY][x + offSetX] === '.') {
+                        if (grid[y + offSetY][x + offSetX].symbol === '.') {
                             continue xLoop;
                         }
                     }
                 }
 
                 generatePassageWaysPrim(y, x);
+                currentID++;
             }
         }
     }
 }
 
-//add argument for start point
 function generatePassageWaysPrim(row, column) {
-    //var randomRow = getRandomIntInclusive(1 , rows - 2);
-    //var randomColumn = getRandomIntInclusive(1, columns - 2);
 
-    var walls = []; //add wall coordinates to this: [Y coordinate on grid, X coordinate on grid, direction in relation to origin]
-
-    grid[row][column] = '.';
+    var walls = [];
+    grid[row][column] = { symbol: '.', id: currentID };
 
     if (row - 1 > 0)
         walls.push([row - 1, column, 'UP']); // upper wall
@@ -136,14 +135,14 @@ function generatePassageWaysPrim(row, column) {
                 if (randomWall[1] + x < 1 || randomWall[1] + x > columns - 2)
                     continue;
 
-                if (grid[(randomWall[0] + y)][(randomWall[1] + x)] === '.') {
+                if (grid[randomWall[0] + y][randomWall[1] + x].symbol === '.') {
                     createPassage = false;
                 }
             }
         }
 
         if (createPassage) {
-            grid[randomWall[0]][randomWall[1]] = '.';
+            grid[randomWall[0]][randomWall[1]] = { symbol: '.', id: currentID };
 
             switch (randomWall[2]) {
                 case 'UP': // dont add bottom wall
@@ -193,7 +192,7 @@ function trimends() {
 
         for (y = 1; y < rows - 1; y++) {
             for (x = 1; x < columns - 1; x++) {
-                if (grid[y][x] === '.') {
+                if (grid[y][x].symbol === '.') {
                     var neighbouringWalls = 0;
 
                     offsetLoop:
@@ -203,7 +202,7 @@ function trimends() {
                             if (offSetY === offSetX || offSetY === -offSetX)
                                 continue;
 
-                            if (grid[y + offSetY][x + offSetX] === '#') {
+                            if (grid[y + offSetY][x + offSetX].symbol === '#') {
                                 neighbouringWalls++;
                                 if (neighbouringWalls >= 3) {
                                     addedWalls.push([y, x]);
@@ -217,7 +216,34 @@ function trimends() {
         }
 
         for (j = 0; j < addedWalls.length; j++) {
-            grid[addedWalls[j][0]][addedWalls[j][1]] = '#';
+            grid[addedWalls[j][0]][addedWalls[j][1]] = { symbol: '#', id: -1 };
+        }
+    }
+}
+
+function createConnections() {
+    for (y = 1; y < rows - 1; y++) {
+        xLoop:
+        for (x = 1; x < columns - 1; x++) {
+            if (grid[y][x].symbol === '#') {
+                var firstElement = grid[y - 1][x];
+                var secondElement = grid[y + 1][x];
+
+                if (firstElement.symbol === '.' && secondElement.symbol === '.' && firstElement.id !== secondElement.id) {
+                    grid[y][x] = { symbol: '%', id: currentID };
+                    currentID++;
+                    continue xLoop;
+                }
+
+                firstElement = grid[y][x - 1];
+                secondElement = grid[y][x + 1];
+
+                if (firstElement.symbol === '.' && secondElement.symbol === '.' && firstElement.id !== secondElement.id) {
+                    grid[y][x] = { symbol: '%', id: currentID };
+                    currentID++;
+                    continue xLoop;
+                }
+            }
         }
     }
 }
@@ -228,7 +254,7 @@ function generateLayout() {
     for (y = 0; y < rows; y++) {
         grid[y] = [];
         for (x = 0; x < columns; x++) {
-            grid[y][x] = '#';
+            grid[y][x] = { symbol: '#', id: -1 };
         }
     }
 
@@ -276,10 +302,7 @@ function drawDisplay() {
     for (y = 0; y < rows; y++) {
         display[y] = [];
         for (x = 0; x < columns; x++) {
-            //if (playerPosY === y && playerPosX === x)
-                //display[y][x] = '@';
-            //else
-                display[y][x] = grid[y][x];
+            display[y][x] = grid[y][x].symbol;
         }
     }
 
@@ -288,11 +311,9 @@ function drawDisplay() {
 
 window.onload = function () {
     grid = generateLayout();
-    setPlayerPos();
     placeRooms();
-    //update the creation of passageways so it always generates something for the entire grid.
-    //generatePassageWaysPrim();
     floodFillMaze();
+    createConnections();
     //trimends();
     drawDisplay();
     document.onkeydown = function (e) {

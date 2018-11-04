@@ -17,6 +17,37 @@ function getRandomIntInclusive(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function mergeRooms() {
+    var traversedRoomtiles = [];
+
+    for (y = 1; y < rows - 1; y++) {
+        for (x = 1; x < columns - 1; x++) {
+
+            if (grid[y][x].isRoom && !traversedRoomtiles.includes(grid[y][x])) {
+                var lastID = grid[y][x].id;
+                var tiles = [];
+
+                tiles.push({ yPos: y, xPos: x });
+
+                while (tiles.length > 0) {
+                    var tile = tiles.pop();
+
+                    if (grid[tile.yPos][tile.xPos].isRoom && !traversedRoomtiles.includes(grid[tile.yPos][tile.xPos])) {
+                        grid[tile.yPos][tile.xPos].id = lastID;
+
+                        tiles.push({ yPos: tile.yPos + 1, xPos: tile.xPos });
+                        tiles.push({ yPos: tile.yPos - 1, xPos: tile.xPos });
+                        tiles.push({ yPos: tile.yPos, xPos: tile.xPos + 1 });
+                        tiles.push({ yPos: tile.yPos, xPos: tile.xPos - 1 });
+                    }
+
+                    traversedRoomtiles.push(grid[tile.yPos][tile.xPos]);
+                }
+            }
+        }
+    }
+}
+
 function placeRooms() {
     currentID = 1;
     for (i = 0; i < roomPlacingAttempts; i++) {
@@ -37,11 +68,9 @@ function placeRooms() {
                     continue;
 
                 if (grid[yOffset][xOffset].symbol !== 'X')
-                    grid[yOffset][xOffset] = { symbol: '.', id: currentID };
+                    grid[yOffset][xOffset] = { symbol: '.', id: currentID, isRoom: true };
             }
         }
-
-        grid[randomRow][randomColumn] = { symbol: 'X', id: currentID };
         currentID++;
     }
 }
@@ -69,7 +98,7 @@ function floodFillMaze() {
 function generatePassageWaysPrim(row, column) {
 
     var walls = [];
-    grid[row][column] = { symbol: '.', id: currentID };
+    grid[row][column] = { symbol: '.', id: currentID, isRoom: false };
 
     if (row - 1 > 0)
         walls.push([row - 1, column, 'UP']); // upper wall
@@ -142,7 +171,7 @@ function generatePassageWaysPrim(row, column) {
         }
 
         if (createPassage) {
-            grid[randomWall[0]][randomWall[1]] = { symbol: '.', id: currentID };
+            grid[randomWall[0]][randomWall[1]] = { symbol: '.', id: currentID, isRoom: false };
 
             switch (randomWall[2]) {
                 case 'UP': // dont add bottom wall
@@ -216,7 +245,7 @@ function trimends() {
         }
 
         for (j = 0; j < addedWalls.length; j++) {
-            grid[addedWalls[j][0]][addedWalls[j][1]] = { symbol: '#', id: -1 };
+            grid[addedWalls[j][0]][addedWalls[j][1]] = { symbol: '#', id: -1, isRoom: false };
         }
     }
 }
@@ -239,7 +268,7 @@ function createConnections() {
                 secondElement = grid[y][x + 1];
 
                 if (firstElement.symbol === '.' && secondElement.symbol === '.' && firstElement.id !== secondElement.id) {
-                    grid[y][x] = { symbol: '%', id: currentID };
+                    grid[y][x] = { symbol: '%', id: currentID, isRoom: false };
                     currentID++;
                     continue xLoop;
                 }
@@ -313,6 +342,7 @@ window.onload = function () {
     grid = generateLayout();
     placeRooms();
     floodFillMaze();
+    mergeRooms();
     createConnections();
     //trimends();
     drawDisplay();

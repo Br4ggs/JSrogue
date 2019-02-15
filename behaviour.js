@@ -1,22 +1,49 @@
+/**
+ * The maximum amount of attemts the generator will do for placing rooms.
+ * */
 const roomPlacingAttempts = 20;
+// TODO: rename these to columns and rows
 const maxRoomHeight = 4; // Y axis
 const maxRoomWidth = 12; // X axis
 
 const trimIterations = 10;
 
-const rows = 40; // Y axis
+const rows = 40;     // Y axis
 const columns = 150; // X axis
+
+/**
+ * The grid itself, is a 2D array.
+ * */
 var grid;
+
+/**
+ * Integer used for determining different regions of the dungeon.
+ * Used during generation only.
+ * */
+// TODO: see if this field can be removed in favor of dependency injection in each method where its needed
 var currentID;
 
 var playerPosY, playerPosX;
 
+/**
+ * Returns a random integer between min (inclusive) and max (inclusive).
+ * The value is no lower than min (or the next integer greater than min
+ * if min isn't an integer) and no greater than max (or the next integer
+ * lower than max if max isn't an integer).
+ * @param {int} min The minimum bottom for the range (inclusive).
+ * @param {int} max The maximum top for the range (inclusive).
+ * @returns {int} the newly created integer.
+ */
 function getRandomIntInclusive(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+/**
+ * Merges rooms which where placed in one-another into one big room.
+ * the ID of the new room will be the one first encountered during iteration.
+ */
 function mergeRooms() {
     var traversedRoomtiles = [];
 
@@ -48,6 +75,9 @@ function mergeRooms() {
     }
 }
 
+/**
+ * Tries to place rooms of random size on random positions in the grid based on the amount of room placing attemtps.
+ */
 function placeRooms() {
     currentID = 1;
     for (i = 0; i < roomPlacingAttempts; i++) {
@@ -75,6 +105,12 @@ function placeRooms() {
     }
 }
 
+/**
+ * Iterates through every tile of the maze.
+ * When it find a wall tile in the maze, it will check its adjacent tiles.
+ * If these are also wall tiles, it will run the passageway generator.
+ * It iterates through the maze filling all spaces in the maze, untill no more maze can be generated.
+ */
 function floodFillMaze() {
     for (y = 1; y < rows - 1; y++) {
         xLoop:
@@ -95,6 +131,12 @@ function floodFillMaze() {
     }
 }
 
+/**
+ * Creates the passages ways via the prim algorithm.
+ * @param {int} row The position to start generating from (Y).
+ * @param {int} column The position to start generating from (X).
+ */
+// TODO: reduce method size if possible
 function generatePassageWaysPrim(row, column) {
 
     var walls = [];
@@ -215,6 +257,11 @@ function generatePassageWaysPrim(row, column) {
     }
 }
 
+/**
+ * Trim dead endings from the maze.
+ * A dead ending is a floor tile which is surrounded by 3 wall tiles.
+ * The amount of trim is dependent on the specified amount of trim iterations.
+ */
 function trimends() {
     for (i = 0; i < trimIterations; i++) {
         var addedWalls = [];
@@ -250,6 +297,11 @@ function trimends() {
     }
 }
 
+/**
+ * Looks for possible connections and marks them as %.
+ * A connection is a wall which is turned into a floor tile when
+ * it is surrounded by 2 floor tiles with a different ID.
+ * */
 function createConnections() {
     for (y = 1; y < rows - 1; y++) {
         xLoop:
@@ -277,6 +329,10 @@ function createConnections() {
     }
 }
 
+/**
+ * Generates the initial maze grid and fills it with walls.
+ * @returns {int[]} The 2D maze grid.
+ */
 function generateLayout() {
     var grid = [];
 
@@ -290,11 +346,18 @@ function generateLayout() {
     return grid;
 }
 
+/**
+ * Sets the initial position of the player on the grid
+ */
 function setPlayerPos() {
     playerPosY = 1;
     playerPosX = 1;
 }
 
+/**
+ * Moves the player 1 tile in the direction given as a string.
+ * @param {string} direction The direction in which to move the player.
+ */
 function movePlayer(direction) {
     switch (direction) {
         case 'UP':
@@ -318,6 +381,12 @@ function movePlayer(direction) {
     drawDisplay();
 }
 
+/**
+ * Checks whether the given tile is traverseable by entities.
+ * @param {int} y The row of the tile.
+ * @param {int} x The column of the tile.
+ * @returns {boolean} Whether this tile is traverseable or not.
+ */
 function isTraverseable(y, x) {
     if (y < 0 || y > rows || x < 0 || x > columns)
         return false;
@@ -325,6 +394,9 @@ function isTraverseable(y, x) {
     return grid[y][x] === '.';
 }
 
+/**
+ * Display the current grid and the entities in it on the page.
+ */
 function drawDisplay() {
     var display = [];
 
@@ -338,6 +410,10 @@ function drawDisplay() {
     document.getElementById("PlayField").innerHTML = display.map(arr => arr.join('')).join('<br>');
 }
 
+/**
+ * Initial function that generates the maze.
+ * Gets called when the window is completely loaded.
+ */
 window.onload = function () {
     grid = generateLayout();
     placeRooms();

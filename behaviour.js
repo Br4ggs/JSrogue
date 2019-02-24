@@ -9,12 +9,13 @@
 /**
  * The maximum amount of attemts the generator will do for placing rooms.
  * */
-const roomPlacingAttempts = 20;
+const roomPlacingAttempts = 25;
+const allowOverlappingRooms = true;
 // TODO: rename these to columns and rows
 const maxRoomHeight = 4; // Y axis
 const maxRoomWidth = 12; // X axis
 
-const trimIterations = 10;
+const trimIterations = 5;
 
 const rows = 40;     // Y axis
 const columns = 150; // X axis
@@ -346,8 +347,6 @@ function createConnections() {
 
                 if (firstRegion.symbol === '.' && secondRegion.symbol === '.' && firstRegion.id !== secondRegion.id) {
                     connections.push({ xPos: x, yPos: y, firstId: firstRegion.id, secondId: secondRegion.id });
-                    //grid[y][x] = { symbol: '%', id: currentID, isRoom: false };
-                    //currentID++;
                     continue xLoop;
                 }
 
@@ -356,29 +355,46 @@ function createConnections() {
 
                 if (firstRegion.symbol === '.' && secondRegion.symbol === '.' && firstRegion.id !== secondRegion.id) {
                     connections.push({ xPos: x, yPos: y, firstId: firstRegion.id, secondId: secondRegion.id });
-                    //grid[y][x] = { symbol: '%', id: currentID, isRoom: false };
-                    //currentID++;
                     continue xLoop;
                 }
             }
         }
     }
-    //scramble the list
-    //get one, make that a true connection
-    //the remove ALL connectors from list that would connect the same 2 areas together
-    //rinse and repeat, untill there are no connectors left
 
     while (connections.length > 0) {
         connections = shuffle(connections);
-        var connection = connections[0];
 
-        grid[connection.yPos][connection.xPos] = { symbol: '.', id: currentID, isRoom: false }; //or could give this a 'door' identity
+        var filteredconn = shuffle(connections.filter(entry =>
+            (entry.firstId === connections[0].firstId && entry.secondId === connections[0].secondId ||
+                entry.firstId === connections[0].secondId && entry.secondId === connections[0].firstId)));
+
+        console.log(filteredconn.length);
+        //get a list of the connections with the desired id's
+        //shuffle this list
+        //pick the first X amount from it. you could randomize this by chance
+        //then filter all connections with desired id's from total list
+        var increment = 1;
+        for (i = 0; i < 3; i++) {
+            if (i >= filteredconn.length) {
+                break;
+            }
+
+            var rnd = Math.random();
+            if (rnd > increment) {
+                break;
+            }
+            increment -= 0.33;
+
+            //add some randomness in here
+
+            grid[filteredconn[i].yPos][filteredconn[i].xPos] = { symbol: '.', id: currentID, isRoom: false }; //or could give this a 'door' identity
+        }
         currentID++;
 
         //the || statement is for when the id's are still the same but are swapped when finding connections horizonally vs vertically
         //you can remove the part after the || operator if you'd like a couple more openings
         //or for something more controlled, try a couple more connectors of the same ID before filtering them all out
-        connections = connections.filter(entry => !(entry.firstId === connection.firstId && entry.secondId === connection.secondId || entry.firstId === connection.secondId && entry.secondId === connection.firstId));
+        connections = connections.filter(entry => !filteredconn.includes(entry));
     }
 }
 

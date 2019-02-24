@@ -1,4 +1,12 @@
 /**
+ * Tiles consist of the following data structure:
+ *  {
+ *      symbol: 'the ascii character that will be displayed on-screen',
+ *      id: 'the id of the region of tiles, used during the generation process and maybe later for other stuff(?)',
+ *      isRoom: 'used to determine rooms within the maze'
+ *  }
+
+/**
  * The maximum amount of attemts the generator will do for placing rooms.
  * */
 const roomPlacingAttempts = 20;
@@ -38,6 +46,30 @@ function getRandomIntInclusive(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/**
+ * Scrambles an array to randomize it.
+ * @param {any} array The array to shuffle.
+ * @returns the shuffled array.
+ */
+function shuffle(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+    }
+
+    return array;
 }
 
 /**
@@ -303,35 +335,56 @@ function trimends() {
  * it is surrounded by 2 floor tiles with a different ID.
  * */
 function createConnections() {
+    var connections = [];
+
     for (y = 1; y < rows - 1; y++) {
         xLoop:
         for (x = 1; x < columns - 1; x++) {
             if (grid[y][x].symbol === '#') {
-                var firstElement = grid[y - 1][x];
-                var secondElement = grid[y + 1][x];
+                var firstRegion = grid[y - 1][x];
+                var secondRegion = grid[y + 1][x];
 
-                if (firstElement.symbol === '.' && secondElement.symbol === '.' && firstElement.id !== secondElement.id) {
-                    grid[y][x] = { symbol: '%', id: currentID };
-                    currentID++;
+                if (firstRegion.symbol === '.' && secondRegion.symbol === '.' && firstRegion.id !== secondRegion.id) {
+                    connections.push({ xPos: x, yPos: y, firstId: firstRegion.id, secondId: secondRegion.id });
+                    //grid[y][x] = { symbol: '%', id: currentID, isRoom: false };
+                    //currentID++;
                     continue xLoop;
                 }
 
-                firstElement = grid[y][x - 1];
-                secondElement = grid[y][x + 1];
+                firstRegion = grid[y][x - 1];
+                secondRegion = grid[y][x + 1];
 
-                if (firstElement.symbol === '.' && secondElement.symbol === '.' && firstElement.id !== secondElement.id) {
-                    grid[y][x] = { symbol: '%', id: currentID, isRoom: false };
-                    currentID++;
+                if (firstRegion.symbol === '.' && secondRegion.symbol === '.' && firstRegion.id !== secondRegion.id) {
+                    connections.push({ xPos: x, yPos: y, firstId: firstRegion.id, secondId: secondRegion.id });
+                    //grid[y][x] = { symbol: '%', id: currentID, isRoom: false };
+                    //currentID++;
                     continue xLoop;
                 }
             }
         }
     }
+    //scramble the list
+    //get one, make that a true connection
+    //the remove ALL connectors from list that would connect the same 2 areas together
+    //rinse and repeat, untill there are no connectors left
+
+    while (connections.length > 0) {
+        connections = shuffle(connections);
+        var connection = connections[0];
+
+        grid[connection.yPos][connection.xPos] = { symbol: '.', id: currentID, isRoom: false }; //or could give this a 'door' identity
+        currentID++;
+
+        //the || statement is for when the id's are still the same but are swapped when finding connections horizonally vs vertically
+        //you can remove the part after the || operator if you'd like a couple more openings
+        //or for something more controlled, try a couple more connectors of the same ID before filtering them all out
+        connections = connections.filter(entry => !(entry.firstId === connection.firstId && entry.secondId === connection.secondId || entry.firstId === connection.secondId && entry.secondId === connection.firstId));
+    }
 }
 
 /**
  * Generates the initial maze grid and fills it with walls.
- * @returns {int[]} The 2D maze grid.
+ * @returns The 2D maze grid.
  */
 function generateLayout() {
     var grid = [];
@@ -420,7 +473,7 @@ window.onload = function () {
     floodFillMaze();
     mergeRooms();
     createConnections();
-    //trimends();
+    trimends();
     drawDisplay();
     document.onkeydown = function (e) {
         switch (String.fromCharCode(e.keyCode)) {

@@ -24,6 +24,7 @@ const columns = 150; // X axis
  * The grid itself, is a 2D array.
  * */
 var grid;
+var roomOrigins;
 
 /**
  * Integer used for determining different regions of the dungeon.
@@ -112,6 +113,7 @@ function mergeRooms() {
  * Tries to place rooms of random size on random positions in the grid based on the amount of room placing attemtps.
  */
 function placeRooms() {
+    roomOrigins = [];
     currentID = 1;
     for (i = 0; i < roomPlacingAttempts; i++) {
 
@@ -119,6 +121,8 @@ function placeRooms() {
         var roomWidth = getRandomIntInclusive(2, maxRoomWidth);
         var randomRow = getRandomIntInclusive(1 + roomHeight, rows - (2 + roomHeight));
         var randomColumn = getRandomIntInclusive(1 + roomWidth, columns - (2 + roomWidth));
+
+        roomOrigins.push({ xPos: randomColumn, yPos: randomRow });
 
         for (y = -roomHeight; y <= roomHeight; y++) {
             var yOffset = y + randomRow;
@@ -419,8 +423,10 @@ function generateLayout() {
  * Sets the initial position of the player on the grid
  */
 function setPlayerPos() {
-    playerPosY = 1;
-    playerPosX = 1;
+    var pos = shuffle(roomOrigins)[0];
+
+    playerPosY = pos.yPos;
+    playerPosX = pos.xPos;
 }
 
 /**
@@ -459,8 +465,7 @@ function movePlayer(direction) {
 function isTraverseable(y, x) {
     if (y < 0 || y > rows || x < 0 || x > columns)
         return false;
-
-    return grid[y][x] === '.';
+    return grid[y][x].symbol === '.';
 }
 
 /**
@@ -476,6 +481,7 @@ function drawDisplay() {
         }
     }
 
+    display[playerPosY][playerPosX] = '@';
     document.getElementById("PlayField").innerHTML = display.map(arr => arr.join('')).join('<br>');
 }
 
@@ -490,6 +496,7 @@ window.onload = function () {
     mergeRooms();
     createConnections();
     trimends();
+    setPlayerPos();
     drawDisplay();
     document.onkeydown = function (e) {
         switch (String.fromCharCode(e.keyCode)) {

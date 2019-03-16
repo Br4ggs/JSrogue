@@ -2,11 +2,15 @@
  * The generator controller orchestrates the different layer generators.
  */
 
+ /**
+  * NOTE: most of the non-generation related matter will be moved to a main manager in the future.
+  */
+
 var playerPosY, playerPosX;
 
 /**
  * Generates the initial maze grid and fills it with walls.
- * @returns The 2D maze grid.
+ * @returns The maze grid as a 2d array.
  */
 function generateLayout() {
     var grid = [];
@@ -25,6 +29,7 @@ function generateLayout() {
  * Sets the initial position of the player on the grid
  */
 //TODO: this needs to be moved to a gen 3 layer generator
+//TODO: prevent player of being spawned inside layer 2 objects
 function setPlayerPos() {
     var pos = shuffle(roomOrigins)[0];
 
@@ -68,6 +73,8 @@ function movePlayer(direction) {
 function isTraverseable(y, x) {
     if (y < 0 || y > rows || x < 0 || x > columns)
         return false;
+
+    //TODO: prevent player from walking on chests and other stuff from layer 2
     return grid[y][x].symbol === '.';
 }
 
@@ -85,6 +92,11 @@ function drawDisplay() {
         }
     }
 
+    //TODO: call some sort of helper method that collects all objects of layer 2
+    chests.forEach(chest => {
+        display[chest.yPos][chest.xPos] = 'C';
+    });
+
     display[playerPosY][playerPosX] = '@';
     document.getElementById("PlayField").innerHTML = display.map(arr => arr.join('')).join('<br>');
 }
@@ -99,7 +111,7 @@ function initialize() {
     generateLayer1();
     generateLayer2();
     generateLayer3();
-    
+
     setPlayerPos();
     drawDisplay();
 };

@@ -1,6 +1,5 @@
 // move all generation logic to here
-// TODO construct all tiles via constructor function
-// move generation relevant maps (like a list of all rooms) to here
+// TODO: construct all tiles via constructor function
 
 const rows = 40;     // Y axis
 const columns = 150; // X axis
@@ -15,13 +14,39 @@ var grid;
  * */
 const roomPlacingAttempts = 25;
 const allowOverlappingRooms = true;
-// TODO: rename these to columns and rows
+
 const maxRoomRows = 4; // Y axis
 const maxRoomColumns = 12; // X axis
 
 const trimIterations = 5;
 
 var roomOrigins;
+
+// This will contain:
+// An array of all the rooms
+// Each room will have a list of all the tiles that make up that room
+var rooms = [];
+
+/**
+ * Representation of a room which consists of it's ID and the corresponding tiles.
+ * 
+ * @param {int} ID The ID of this room.
+ */
+function RoomData(ID) {
+    this.ID = ID
+    this.tiles = []
+}
+
+/**
+ * Represents a tile belonging to a room in the RoomData tile array.
+ * 
+ * @param {int} yPos The Y position of the tile on the grid.
+ * @param {int} xPos The X position of the tile on the grid.
+ */
+function RoomDataTile(yPos, xPos) {
+    this.yPos = yPos;
+    this.xPos = xPos;
+}
 
 /**
  * Integer used for determining different regions of the dungeon.
@@ -38,6 +63,8 @@ function generateLayer1() {
     mergeRooms();
     createConnections();
     trimends();
+
+    console.log("rooms is " + rooms.length + " long");
 }
 
 /**
@@ -54,13 +81,17 @@ function mergeRooms() {
                 var lastID = grid[y][x].id;
                 var tiles = [];
 
-                tiles.push({ yPos: y, xPos: x });
+                var currentRoom = new RoomData(lastID);
+
+                tiles.push(new RoomDataTile(y, x));
 
                 while (tiles.length > 0) {
                     var tile = tiles.pop();
 
                     if (grid[tile.yPos][tile.xPos].isRoom && !traversedRoomtiles.includes(grid[tile.yPos][tile.xPos])) {
                         grid[tile.yPos][tile.xPos].id = lastID;
+
+                        currentRoom.tiles.push(tile);
 
                         tiles.push({ yPos: tile.yPos + 1, xPos: tile.xPos });
                         tiles.push({ yPos: tile.yPos - 1, xPos: tile.xPos });
@@ -70,6 +101,8 @@ function mergeRooms() {
 
                     traversedRoomtiles.push(grid[tile.yPos][tile.xPos]);
                 }
+
+                rooms.push(currentRoom);
             }
         }
     }

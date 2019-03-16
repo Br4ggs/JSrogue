@@ -1,10 +1,14 @@
+// move all generation logic to here
+// TODO construct all tiles via constructor function
+// move generation relevant maps (like a list of all rooms) to here
+
+const rows = 40;     // Y axis
+const columns = 150; // X axis
+
 /**
- * Tiles consist of the following data structure:
- *  {
- *      symbol: 'the ascii character that will be displayed on-screen',
- *      id: 'the id of the region of tiles, used during the generation process and maybe later for other stuff(?)',
- *      isRoom: 'used to determine rooms within the maze'
- *  }
+ * The grid itself, is a 2D array.
+ */
+var grid;
 
 /**
  * The maximum amount of attemts the generator will do for placing rooms.
@@ -12,18 +16,11 @@
 const roomPlacingAttempts = 25;
 const allowOverlappingRooms = true;
 // TODO: rename these to columns and rows
-const maxRoomHeight = 4; // Y axis
-const maxRoomWidth = 12; // X axis
+const maxRoomRows = 4; // Y axis
+const maxRoomColumns = 12; // X axis
 
 const trimIterations = 5;
 
-const rows = 40;     // Y axis
-const columns = 150; // X axis
-
-/**
- * The grid itself, is a 2D array.
- * */
-var grid;
 var roomOrigins;
 
 /**
@@ -33,45 +30,14 @@ var roomOrigins;
 // TODO: see if this field can be removed in favor of dependency injection in each method where its needed
 var currentID;
 
-var playerPosY, playerPosX;
+function generateLayer1() {
+    console.log("generating first layer");
 
-/**
- * Returns a random integer between min (inclusive) and max (inclusive).
- * The value is no lower than min (or the next integer greater than min
- * if min isn't an integer) and no greater than max (or the next integer
- * lower than max if max isn't an integer).
- * @param {int} min The minimum bottom for the range (inclusive).
- * @param {int} max The maximum top for the range (inclusive).
- * @returns {int} the newly created integer.
- */
-function getRandomIntInclusive(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-/**
- * Scrambles an array to randomize it.
- * @param {any} array The array to shuffle.
- * @returns the shuffled array.
- */
-function shuffle(array) {
-    var currentIndex = array.length, temporaryValue, randomIndex;
-
-    // While there remain elements to shuffle...
-    while (0 !== currentIndex) {
-
-        // Pick a remaining element...
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex -= 1;
-
-        // And swap it with the current element.
-        temporaryValue = array[currentIndex];
-        array[currentIndex] = array[randomIndex];
-        array[randomIndex] = temporaryValue;
-    }
-
-    return array;
+    placeRooms();
+    floodFillMaze();
+    mergeRooms();
+    createConnections();
+    trimends();
 }
 
 /**
@@ -117,8 +83,8 @@ function placeRooms() {
     currentID = 1;
     for (i = 0; i < roomPlacingAttempts; i++) {
 
-        var roomHeight = getRandomIntInclusive(2, maxRoomHeight);
-        var roomWidth = getRandomIntInclusive(2, maxRoomWidth);
+        var roomHeight = getRandomIntInclusive(2, maxRoomRows);
+        var roomWidth = getRandomIntInclusive(2, maxRoomColumns);
         var randomRow = getRandomIntInclusive(1 + roomHeight, rows - (2 + roomHeight));
         var randomColumn = getRandomIntInclusive(1 + roomWidth, columns - (2 + roomWidth));
 
@@ -372,7 +338,6 @@ function createConnections() {
             (entry.firstId === connections[0].firstId && entry.secondId === connections[0].secondId ||
                 entry.firstId === connections[0].secondId && entry.secondId === connections[0].firstId)));
 
-        console.log(filteredconn.length);
         //get a list of the connections with the desired id's
         //shuffle this list
         //pick the first X amount from it. you could randomize this by chance
@@ -401,117 +366,3 @@ function createConnections() {
         connections = connections.filter(entry => !filteredconn.includes(entry));
     }
 }
-
-/**
- * Generates the initial maze grid and fills it with walls.
- * @returns The 2D maze grid.
- */
-function generateLayout() {
-    var grid = [];
-
-    for (y = 0; y < rows; y++) {
-        grid[y] = [];
-        for (x = 0; x < columns; x++) {
-            grid[y][x] = { symbol: '#', id: -1 };
-        }
-    }
-
-    return grid;
-}
-
-/**
- * Sets the initial position of the player on the grid
- */
-function setPlayerPos() {
-    var pos = shuffle(roomOrigins)[0];
-
-    playerPosY = pos.yPos;
-    playerPosX = pos.xPos;
-}
-
-/**
- * Moves the player 1 tile in the direction given as a string.
- * @param {string} direction The direction in which to move the player.
- */
-function movePlayer(direction) {
-    switch (direction) {
-        case 'UP':
-            if (isTraverseable(playerPosY - 1, playerPosX))
-                playerPosY--;
-            break;
-        case 'DOWN':
-            if (isTraverseable(playerPosY + 1, playerPosX))
-                playerPosY++;
-            break;
-        case 'LEFT':
-            if (isTraverseable(playerPosY, playerPosX - 1))
-                playerPosX--;
-            break;
-        case 'RIGHT':
-            if (isTraverseable(playerPosY, playerPosX + 1))
-                playerPosX++;
-            break;
-    }
-
-    drawDisplay();
-}
-
-/**
- * Checks whether the given tile is traverseable by entities.
- * @param {int} y The row of the tile.
- * @param {int} x The column of the tile.
- * @returns {boolean} Whether this tile is traverseable or not.
- */
-function isTraverseable(y, x) {
-    if (y < 0 || y > rows || x < 0 || x > columns)
-        return false;
-    return grid[y][x].symbol === '.';
-}
-
-/**
- * Display the current grid and the entities in it on the page.
- */
-function drawDisplay() {
-    var display = [];
-
-    for (y = 0; y < rows; y++) {
-        display[y] = [];
-        for (x = 0; x < columns; x++) {
-            display[y][x] = grid[y][x].symbol;
-        }
-    }
-
-    display[playerPosY][playerPosX] = '@';
-    document.getElementById("PlayField").innerHTML = display.map(arr => arr.join('')).join('<br>');
-}
-
-/**
- * Initial function that generates the maze.
- * Gets called when the window is completely loaded.
- */
-window.onload = function () {
-    grid = generateLayout();
-    placeRooms();
-    floodFillMaze();
-    mergeRooms();
-    createConnections();
-    trimends();
-    setPlayerPos();
-    drawDisplay();
-    document.onkeydown = function (e) {
-        switch (String.fromCharCode(e.keyCode)) {
-            case 'W':
-                movePlayer('UP');
-                break;
-            case 'A':
-                movePlayer('LEFT');
-                break;
-            case 'S':
-                movePlayer('DOWN');
-                break;
-            case 'D':
-                movePlayer('RIGHT');
-                break;
-        }
-    };
-};

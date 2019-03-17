@@ -116,19 +116,19 @@ function placeRooms() {
     currentID = 1;
     for (i = 0; i < roomPlacingAttempts; i++) {
 
-        var roomHeight = getRandomIntInclusive(2, maxRoomRows);
-        var roomWidth = getRandomIntInclusive(2, maxRoomColumns);
-        var randomRow = getRandomIntInclusive(1 + roomHeight, rows - (2 + roomHeight));
-        var randomColumn = getRandomIntInclusive(1 + roomWidth, columns - (2 + roomWidth));
+        var roomRows = getRandomIntInclusive(2, maxRoomRows);
+        var roomColumns = getRandomIntInclusive(2, maxRoomColumns);
+        var randomRow = getRandomIntInclusive(1 + roomRows, rows - (2 + roomRows));
+        var randomColumn = getRandomIntInclusive(1 + roomColumns, columns - (2 + roomColumns));
 
         roomOrigins.push({ xPos: randomColumn, yPos: randomRow });
 
-        for (y = -roomHeight; y <= roomHeight; y++) {
+        for (y = -roomRows; y <= roomRows; y++) {
             var yOffset = y + randomRow;
             if (yOffset <= 0 || yOffset >= rows - 1)
                 continue;
 
-            for (x = -roomWidth; x <= roomWidth; x++) {
+            for (x = -roomColumns; x <= roomColumns; x++) {
                 var xOffset = x + randomColumn;
                 if (xOffset <= 0 || xOffset >= columns - 1)
                     continue;

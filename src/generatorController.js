@@ -97,6 +97,9 @@ function drawDisplay() {
         display[chest.yPos][chest.xPos] = 'C';
     });
 
+    display[upStairCase.yPos][upStairCase.xPos] = 'U';
+    display[downStairCase.yPos][downStairCase.xPos] = 'D';
+
     display[playerPosY][playerPosX] = '@';
     document.getElementById("PlayField").innerHTML = display.map(arr => arr.join('')).join('<br>');
 }

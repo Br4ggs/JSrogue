@@ -28,27 +28,6 @@ var roomOrigins;
 var rooms = [];
 
 /**
- * Representation of a room which consists of it's ID and the corresponding tiles.
- * 
- * @param {int} ID The ID of this room.
- */
-function RoomData(ID) {
-    this.ID = ID
-    this.tiles = []
-}
-
-/**
- * Represents a tile belonging to a room in the RoomData tile array.
- * 
- * @param {int} yPos The Y position of the tile on the grid.
- * @param {int} xPos The X position of the tile on the grid.
- */
-function RoomDataTile(yPos, xPos) {
-    this.yPos = yPos;
-    this.xPos = xPos;
-}
-
-/**
  * Integer used for determining different regions of the dungeon.
  * Used during generation only.
  * */
@@ -58,6 +37,7 @@ var currentID;
 function generateLayer1() {
     console.log("generating first layer");
 
+    grid = generateLayout();
     placeRooms();
     floodFillMaze();
     mergeRooms();
@@ -65,6 +45,23 @@ function generateLayer1() {
     trimends();
 
     console.log("rooms is " + rooms.length + " long");
+}
+
+/**
+ * Generates the initial maze grid and fills it with walls.
+ * @returns The maze grid as a 2d array.
+ */
+function generateLayout() {
+    var grid = [];
+
+    for (y = 0; y < rows; y++) {
+        grid[y] = [];
+        for (x = 0; x < columns; x++) {
+            grid[y][x] = new Tile('#', -1);
+        }
+    }
+
+    return grid;
 }
 
 /**
@@ -78,7 +75,7 @@ function mergeRooms() {
         for (x = 1; x < columns - 1; x++) {
 
             if (grid[y][x].isRoom && !traversedRoomtiles.includes(grid[y][x])) {
-                var lastID = grid[y][x].id;
+                var lastID = grid[y][x].regionId;
                 var tiles = [];
 
                 var currentRoom = new RoomData(lastID);
@@ -89,7 +86,7 @@ function mergeRooms() {
                     var tile = tiles.pop();
 
                     if (grid[tile.yPos][tile.xPos].isRoom && !traversedRoomtiles.includes(grid[tile.yPos][tile.xPos])) {
-                        grid[tile.yPos][tile.xPos].id = lastID;
+                        grid[tile.yPos][tile.xPos].regionId = lastID;
 
                         currentRoom.tiles.push(tile);
 
@@ -133,8 +130,9 @@ function placeRooms() {
                 if (xOffset <= 0 || xOffset >= columns - 1)
                     continue;
 
+                    //TODO: REMOVE
                 if (grid[yOffset][xOffset].symbol !== 'X')
-                    grid[yOffset][xOffset] = { symbol: '.', id: currentID, isRoom: true };
+                    grid[yOffset][xOffset] = new Tile('.', currentID, true);
             }
         }
         currentID++;
@@ -176,7 +174,7 @@ function floodFillMaze() {
 function generatePassageWaysPrim(row, column) {
 
     var walls = [];
-    grid[row][column] = { symbol: '.', id: currentID, isRoom: false };
+    grid[row][column] = new Tile('.', currentID, false);
 
     if (row - 1 > 0)
         walls.push([row - 1, column, 'UP']); // upper wall
@@ -249,7 +247,7 @@ function generatePassageWaysPrim(row, column) {
         }
 
         if (createPassage) {
-            grid[randomWall[0]][randomWall[1]] = { symbol: '.', id: currentID, isRoom: false };
+            grid[randomWall[0]][randomWall[1]] = new Tile('.', currentID, false);
 
             switch (randomWall[2]) {
                 case 'UP': // dont add bottom wall
@@ -328,7 +326,7 @@ function trimends() {
         }
 
         for (j = 0; j < addedWalls.length; j++) {
-            grid[addedWalls[j][0]][addedWalls[j][1]] = { symbol: '#', id: -1, isRoom: false };
+            grid[addedWalls[j][0]][addedWalls[j][1]] = new Tile('#', -1, false);
         }
     }
 }
@@ -348,16 +346,16 @@ function createConnections() {
                 var firstRegion = grid[y - 1][x];
                 var secondRegion = grid[y + 1][x];
 
-                if (firstRegion.symbol === '.' && secondRegion.symbol === '.' && firstRegion.id !== secondRegion.id) {
-                    connections.push({ xPos: x, yPos: y, firstId: firstRegion.id, secondId: secondRegion.id });
+                if (firstRegion.symbol === '.' && secondRegion.symbol === '.' && firstRegion.regionId !== secondRegion.regionId) {
+                    connections.push({ xPos: x, yPos: y, firstId: firstRegion.regionId, secondId: secondRegion.regionId });
                     continue xLoop;
                 }
 
                 firstRegion = grid[y][x - 1];
                 secondRegion = grid[y][x + 1];
 
-                if (firstRegion.symbol === '.' && secondRegion.symbol === '.' && firstRegion.id !== secondRegion.id) {
-                    connections.push({ xPos: x, yPos: y, firstId: firstRegion.id, secondId: secondRegion.id });
+                if (firstRegion.symbol === '.' && secondRegion.symbol === '.' && firstRegion.regionId !== secondRegion.regionId) {
+                    connections.push({ xPos: x, yPos: y, firstId: firstRegion.regionId, secondId: secondRegion.regionId });
                     continue xLoop;
                 }
             }
@@ -389,7 +387,7 @@ function createConnections() {
 
             //add some randomness in here
 
-            grid[filteredconn[i].yPos][filteredconn[i].xPos] = { symbol: '.', id: currentID, isRoom: false }; //or could give this a 'door' identity
+            grid[filteredconn[i].yPos][filteredconn[i].xPos] = new Tile('.', currentID, false); //or could give this a 'door' identity
         }
         currentID++;
 

@@ -5,6 +5,7 @@ var chests = [];
 var upStairCase;
 var downStairCase;
 
+//TODO: currently not used, but could this be subclasses from a base tile class which holds the yPos and xPos value?
 function Chest(yPos, xPos) {
     this.yPos = yPos;
     this.xPos = xPos;
@@ -14,13 +15,31 @@ function Chest(yPos, xPos) {
 
 function generateLayer2() {
     console.log("generating second layer");
-    placeChests();
     placeStairCases();
+    placeChests();
 }
 
-//TODO: create helper method to check if something on this level occupies a specific tile
+/**
+ * Helper function to tell if a tile is already occupied by a layer 2 entity.
+ * 
+ * @param {int} yPos The y position of the tile.
+ * @param {int} xPos The x position of the tile.
+ */
 function isOccupied(yPos, xPos) {
 
+    if(upStairCase !== undefined && upStairCase.yPos === yPos && upStairCase.xPos === xPos) {
+        return true;
+    }
+
+    if(downStairCase !== undefined && downStairCase.yPos === yPos && downStairCase.xPos === xPos) {
+        return true;
+    }
+
+    if(chests.filter(chest => (chest.yPos === yPos && chest.xPos === xPos)).length > 0) {
+        return true;
+    }
+
+    return false;
 }
 
 /**
@@ -36,7 +55,7 @@ function placeChests() {
         var room = shuffle(rooms)[0];
         var tile = shuffle(room.tiles)[0];
 
-        if(!chests.includes(tile)) {
+        if(!isOccupied(tile.yPos, tile.xPos)) {
             chests.push(tile);
         }
     }
@@ -75,7 +94,7 @@ function placeStairCases() {
     var secondRoom = shuffle(rooms)[0];
     var secondRoomCornerTiles = getCornerTilesFromRoom(secondRoom);
 
-    //TODO: use helper method to prevent placing staircase on chest, or another staircase
     upStairCase = shuffle(firstRoomCornerTiles)[0];
-    downStairCase = shuffle(secondRoomCornerTiles)[0];
+    // For the down staircase we do an extra filter to make sure there's no possibility of putting both staircases on the same tile.
+    downStairCase = shuffle(secondRoomCornerTiles).filter(tile => tile !== upStairCase)[0];
 }

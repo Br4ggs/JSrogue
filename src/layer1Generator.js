@@ -1,5 +1,4 @@
 // move all generation logic to here
-// TODO: construct all tiles via constructor function
 
 const rows = 40;     // Y axis
 const columns = 150; // X axis
@@ -129,10 +128,8 @@ function placeRooms() {
                 var xOffset = x + randomColumn;
                 if (xOffset <= 0 || xOffset >= columns - 1)
                     continue;
-
-                    //TODO: REMOVE
-                if (grid[yOffset][xOffset].symbol !== 'X')
-                    grid[yOffset][xOffset] = new Tile('.', currentID, true);
+                    
+                grid[yOffset][xOffset] = new Tile('.', currentID, true);
             }
         }
         currentID++;
@@ -332,7 +329,7 @@ function trimends() {
 }
 
 /**
- * Looks for possible connections and marks them as %.
+ * Looks for possible connections and marks them as such.
  * A connection is a wall which is turned into a floor tile when
  * it is surrounded by 2 floor tiles with a different ID.
  * */

@@ -13,6 +13,7 @@ var playerPosY, playerPosX;
  */
 //TODO: this needs to be moved to a gen 3 layer generator
 //TODO: prevent player of being spawned inside layer 2 objects
+//TODO: spawn player near down staircase
 function setPlayerPos() {
     var pos = shuffle(roomOrigins)[0];
 

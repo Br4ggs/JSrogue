@@ -1,20 +1,30 @@
-/**
- * The maximum amount of attemts the generator will do for placing rooms.
- * */
-const roomPlacingAttempts = 20;
-// TODO: rename these to columns and rows
-const maxRoomHeight = 4; // Y axis
-const maxRoomWidth = 12; // X axis
-
-const trimIterations = 10;
+// move all generation logic to here
 
 const rows = 40;     // Y axis
 const columns = 150; // X axis
 
 /**
  * The grid itself, is a 2D array.
- * */
+ */
 var grid;
+
+/**
+ * The maximum amount of attemts the generator will do for placing rooms.
+ * */
+const roomPlacingAttempts = 25;
+const allowOverlappingRooms = true;
+
+const maxRoomRows = 4; // Y axis
+const maxRoomColumns = 12; // X axis
+
+const trimIterations = 5;
+
+var roomOrigins;
+
+// This will contain:
+// An array of all the rooms
+// Each room will have a list of all the tiles that make up that room
+var rooms = [];
 
 /**
  * Integer used for determining different regions of the dungeon.
@@ -23,21 +33,34 @@ var grid;
 // TODO: see if this field can be removed in favor of dependency injection in each method where its needed
 var currentID;
 
-var playerPosY, playerPosX;
+function generateLayer1() {
+    console.log("generating first layer");
+
+    grid = generateLayout();
+    placeRooms();
+    floodFillMaze();
+    mergeRooms();
+    createConnections();
+    trimends();
+
+    console.log("rooms is " + rooms.length + " long");
+}
 
 /**
- * Returns a random integer between min (inclusive) and max (inclusive).
- * The value is no lower than min (or the next integer greater than min
- * if min isn't an integer) and no greater than max (or the next integer
- * lower than max if max isn't an integer).
- * @param {int} min The minimum bottom for the range (inclusive).
- * @param {int} max The maximum top for the range (inclusive).
- * @returns {int} the newly created integer.
+ * Generates the initial maze grid and fills it with walls.
+ * @returns The maze grid as a 2d array.
  */
-function getRandomIntInclusive(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+function generateLayout() {
+    var grid = [];
+
+    for (y = 0; y < rows; y++) {
+        grid[y] = [];
+        for (x = 0; x < columns; x++) {
+            grid[y][x] = new Tile('#', -1);
+        }
+    }
+
+    return grid;
 }
 
 /**
@@ -51,16 +74,20 @@ function mergeRooms() {
         for (x = 1; x < columns - 1; x++) {
 
             if (grid[y][x].isRoom && !traversedRoomtiles.includes(grid[y][x])) {
-                var lastID = grid[y][x].id;
+                var lastID = grid[y][x].regionId;
                 var tiles = [];
 
-                tiles.push({ yPos: y, xPos: x });
+                var currentRoom = new RoomData(lastID);
+
+                tiles.push(new RoomDataTile(y, x));
 
                 while (tiles.length > 0) {
                     var tile = tiles.pop();
 
                     if (grid[tile.yPos][tile.xPos].isRoom && !traversedRoomtiles.includes(grid[tile.yPos][tile.xPos])) {
-                        grid[tile.yPos][tile.xPos].id = lastID;
+                        grid[tile.yPos][tile.xPos].regionId = lastID;
+
+                        currentRoom.tiles.push(tile);
 
                         tiles.push({ yPos: tile.yPos + 1, xPos: tile.xPos });
                         tiles.push({ yPos: tile.yPos - 1, xPos: tile.xPos });
@@ -70,6 +97,8 @@ function mergeRooms() {
 
                     traversedRoomtiles.push(grid[tile.yPos][tile.xPos]);
                 }
+
+                rooms.push(currentRoom);
             }
         }
     }
@@ -79,26 +108,28 @@ function mergeRooms() {
  * Tries to place rooms of random size on random positions in the grid based on the amount of room placing attemtps.
  */
 function placeRooms() {
+    roomOrigins = [];
     currentID = 1;
     for (i = 0; i < roomPlacingAttempts; i++) {
 
-        var roomHeight = getRandomIntInclusive(2, maxRoomHeight);
-        var roomWidth = getRandomIntInclusive(2, maxRoomWidth);
-        var randomRow = getRandomIntInclusive(1 + roomHeight, rows - (2 + roomHeight));
-        var randomColumn = getRandomIntInclusive(1 + roomWidth, columns - (2 + roomWidth));
+        var roomRows = getRandomIntInclusive(2, maxRoomRows);
+        var roomColumns = getRandomIntInclusive(2, maxRoomColumns);
+        var randomRow = getRandomIntInclusive(1 + roomRows, rows - (2 + roomRows));
+        var randomColumn = getRandomIntInclusive(1 + roomColumns, columns - (2 + roomColumns));
 
-        for (y = -roomHeight; y <= roomHeight; y++) {
+        roomOrigins.push({ xPos: randomColumn, yPos: randomRow });
+
+        for (y = -roomRows; y <= roomRows; y++) {
             var yOffset = y + randomRow;
             if (yOffset <= 0 || yOffset >= rows - 1)
                 continue;
 
-            for (x = -roomWidth; x <= roomWidth; x++) {
+            for (x = -roomColumns; x <= roomColumns; x++) {
                 var xOffset = x + randomColumn;
                 if (xOffset <= 0 || xOffset >= columns - 1)
                     continue;
-
-                if (grid[yOffset][xOffset].symbol !== 'X')
-                    grid[yOffset][xOffset] = { symbol: '.', id: currentID, isRoom: true };
+                    
+                grid[yOffset][xOffset] = new Tile('.', currentID, true);
             }
         }
         currentID++;
@@ -140,7 +171,7 @@ function floodFillMaze() {
 function generatePassageWaysPrim(row, column) {
 
     var walls = [];
-    grid[row][column] = { symbol: '.', id: currentID, isRoom: false };
+    grid[row][column] = new Tile('.', currentID, false);
 
     if (row - 1 > 0)
         walls.push([row - 1, column, 'UP']); // upper wall
@@ -213,7 +244,7 @@ function generatePassageWaysPrim(row, column) {
         }
 
         if (createPassage) {
-            grid[randomWall[0]][randomWall[1]] = { symbol: '.', id: currentID, isRoom: false };
+            grid[randomWall[0]][randomWall[1]] = new Tile('.', currentID, false);
 
             switch (randomWall[2]) {
                 case 'UP': // dont add bottom wall
@@ -292,150 +323,74 @@ function trimends() {
         }
 
         for (j = 0; j < addedWalls.length; j++) {
-            grid[addedWalls[j][0]][addedWalls[j][1]] = { symbol: '#', id: -1, isRoom: false };
+            grid[addedWalls[j][0]][addedWalls[j][1]] = new Tile('#', -1, false);
         }
     }
 }
 
 /**
- * Looks for possible connections and marks them as %.
+ * Looks for possible connections and marks them as such.
  * A connection is a wall which is turned into a floor tile when
  * it is surrounded by 2 floor tiles with a different ID.
  * */
 function createConnections() {
+    var connections = [];
+
     for (y = 1; y < rows - 1; y++) {
         xLoop:
         for (x = 1; x < columns - 1; x++) {
             if (grid[y][x].symbol === '#') {
-                var firstElement = grid[y - 1][x];
-                var secondElement = grid[y + 1][x];
+                var firstRegion = grid[y - 1][x];
+                var secondRegion = grid[y + 1][x];
 
-                if (firstElement.symbol === '.' && secondElement.symbol === '.' && firstElement.id !== secondElement.id) {
-                    grid[y][x] = { symbol: '%', id: currentID };
-                    currentID++;
+                if (firstRegion.symbol === '.' && secondRegion.symbol === '.' && firstRegion.regionId !== secondRegion.regionId) {
+                    connections.push({ xPos: x, yPos: y, firstId: firstRegion.regionId, secondId: secondRegion.regionId });
                     continue xLoop;
                 }
 
-                firstElement = grid[y][x - 1];
-                secondElement = grid[y][x + 1];
+                firstRegion = grid[y][x - 1];
+                secondRegion = grid[y][x + 1];
 
-                if (firstElement.symbol === '.' && secondElement.symbol === '.' && firstElement.id !== secondElement.id) {
-                    grid[y][x] = { symbol: '%', id: currentID, isRoom: false };
-                    currentID++;
+                if (firstRegion.symbol === '.' && secondRegion.symbol === '.' && firstRegion.regionId !== secondRegion.regionId) {
+                    connections.push({ xPos: x, yPos: y, firstId: firstRegion.regionId, secondId: secondRegion.regionId });
                     continue xLoop;
                 }
             }
         }
     }
-}
 
-/**
- * Generates the initial maze grid and fills it with walls.
- * @returns {int[]} The 2D maze grid.
- */
-function generateLayout() {
-    var grid = [];
+    while (connections.length > 0) {
+        connections = shuffle(connections);
 
-    for (y = 0; y < rows; y++) {
-        grid[y] = [];
-        for (x = 0; x < columns; x++) {
-            grid[y][x] = { symbol: '#', id: -1 };
+        var filteredconn = shuffle(connections.filter(entry =>
+            (entry.firstId === connections[0].firstId && entry.secondId === connections[0].secondId ||
+                entry.firstId === connections[0].secondId && entry.secondId === connections[0].firstId)));
+
+        //get a list of the connections with the desired id's
+        //shuffle this list
+        //pick the first X amount from it. you could randomize this by chance
+        //then filter all connections with desired id's from total list
+        var increment = 1;
+        for (i = 0; i < 3; i++) {
+            if (i >= filteredconn.length) {
+                break;
+            }
+
+            var rnd = Math.random();
+            if (rnd > increment) {
+                break;
+            }
+            increment -= 0.33;
+
+            //add some randomness in here
+
+            grid[filteredconn[i].yPos][filteredconn[i].xPos] = new Tile('.', currentID, false); //or could give this a 'door' identity
         }
+        currentID++;
+
+        //the || statement is for when the id's are still the same but are swapped when finding connections horizonally vs vertically
+        //you can remove the part after the || operator if you'd like a couple more openings
+        //or for something more controlled, try a couple more connectors of the same ID before filtering them all out
+        connections = connections.filter(entry => !filteredconn.includes(entry));
     }
-
-    return grid;
 }
-
-/**
- * Sets the initial position of the player on the grid
- */
-function setPlayerPos() {
-    playerPosY = 1;
-    playerPosX = 1;
-}
-
-/**
- * Moves the player 1 tile in the direction given as a string.
- * @param {string} direction The direction in which to move the player.
- */
-function movePlayer(direction) {
-    switch (direction) {
-        case 'UP':
-            if (isTraverseable(playerPosY - 1, playerPosX))
-                playerPosY--;
-            break;
-        case 'DOWN':
-            if (isTraverseable(playerPosY + 1, playerPosX))
-                playerPosY++;
-            break;
-        case 'LEFT':
-            if (isTraverseable(playerPosY, playerPosX - 1))
-                playerPosX--;
-            break;
-        case 'RIGHT':
-            if (isTraverseable(playerPosY, playerPosX + 1))
-                playerPosX++;
-            break;
-    }
-
-    drawDisplay();
-}
-
-/**
- * Checks whether the given tile is traverseable by entities.
- * @param {int} y The row of the tile.
- * @param {int} x The column of the tile.
- * @returns {boolean} Whether this tile is traverseable or not.
- */
-function isTraverseable(y, x) {
-    if (y < 0 || y > rows || x < 0 || x > columns)
-        return false;
-
-    return grid[y][x] === '.';
-}
-
-/**
- * Display the current grid and the entities in it on the page.
- */
-function drawDisplay() {
-    var display = [];
-
-    for (y = 0; y < rows; y++) {
-        display[y] = [];
-        for (x = 0; x < columns; x++) {
-            display[y][x] = grid[y][x].symbol;
-        }
-    }
-
-    document.getElementById("PlayField").innerHTML = display.map(arr => arr.join('')).join('<br>');
-}
-
-/**
- * Initial function that generates the maze.
- * Gets called when the window is completely loaded.
- */
-window.onload = function () {
-    grid = generateLayout();
-    placeRooms();
-    floodFillMaze();
-    mergeRooms();
-    createConnections();
-    //trimends();
-    drawDisplay();
-    document.onkeydown = function (e) {
-        switch (String.fromCharCode(e.keyCode)) {
-            case 'W':
-                movePlayer('UP');
-                break;
-            case 'A':
-                movePlayer('LEFT');
-                break;
-            case 'S':
-                movePlayer('DOWN');
-                break;
-            case 'D':
-                movePlayer('RIGHT');
-                break;
-        }
-    };
-};

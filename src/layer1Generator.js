@@ -1,5 +1,6 @@
 //TODO figure out a way to make this generator object stateless
 //could be done by passing through variables and currying
+//passing by reference is also possible for objects
 
 var Layer1Generator = function () {
     this.rows = 40;
@@ -26,7 +27,6 @@ Layer1Generator.prototype.generateLayer = function () {
     var currentID;
     currentID = this.placeRooms(currentID);
     currentID = this.floodFillMaze(currentID);
-
     this.mergeRooms();
     currentID = this.createConnections(currentID);
     this.trimends();

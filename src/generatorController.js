@@ -6,6 +6,7 @@
   * NOTE: most of the non-generation related matter will be moved to a main manager in the future.
   */
 var layer1Generator = new Layer1Generator();
+var layer2Generator = new Layer2Generator();
 
 var playerPosY, playerPosX;
 
@@ -67,9 +68,8 @@ function isTraverseable(y, x) {
  * Gets called when the window is completely loaded.
  */
 function initialize() {
-    //generateLayer1();
     layer1Generator.generateLayer();
-    //generateLayer2();
+    layer2Generator.generateLayer();
     //generateLayer3();
 
     //setPlayerPos();

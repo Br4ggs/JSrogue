@@ -16,12 +16,12 @@ function drawDisplay() {
     }
 
     //TODO: call some sort of helper method that collects all objects of layer 2
-    //chests.forEach(chest => {
-    //    display[chest.yPos][chest.xPos] = 'C';
-    //});
+    layer2Generator.chests.forEach(chest => {
+        display[chest.yPos][chest.xPos] = 'C';
+    });
 
-    //display[upStairCase.yPos][upStairCase.xPos] = 'U';
-    //display[downStairCase.yPos][downStairCase.xPos] = 'D';
+    display[layer2Generator.upStairCase.yPos][layer2Generator.upStairCase.xPos] = 'U';
+    display[layer2Generator.downStairCase.yPos][layer2Generator.downStairCase.xPos] = 'D';
 
     //display[playerPosY][playerPosX] = '@';
     document.getElementById("PlayField").innerHTML = display.map(arr => arr.join('')).join('<br>');

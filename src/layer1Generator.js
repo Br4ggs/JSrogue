@@ -16,6 +16,7 @@ var Layer1Generator = function () {
 
     this.trimIterations = 5;
 
+    //TODO: put roomOrigins in rooms as variable
     this.roomOrigins = [];
     this.rooms = [];
 };

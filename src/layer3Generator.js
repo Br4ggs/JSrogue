@@ -1,7 +1,11 @@
 /**
  * This is just a stump, actual generation of NPC's will come later.
  */
+var Layer3Generator = function () {
+    //stump
+};
 
-function generateLayer3() {
-    console.log("generating third layer")
-}
+Layer3Generator.prototype.generateLayer = function () {
+    //stump
+    console.log("generating third layer");
+};

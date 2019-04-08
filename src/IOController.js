@@ -6,16 +6,16 @@ function initialize() {
     document.onkeydown = function (e) {
         switch (String.fromCharCode(e.keyCode)) {
             case 'W':
-                movePlayer('UP');
+                layer3Generator.movePlayer('UP');
                 break;
             case 'A':
-                movePlayer('LEFT');
+                layer3Generator.movePlayer('LEFT');
                 break;
             case 'S':
-                movePlayer('DOWN');
+                layer3Generator.movePlayer('DOWN');
                 break;
             case 'D':
-                movePlayer('RIGHT');
+                layer3Generator.movePlayer('RIGHT');
                 break;
         }
     };

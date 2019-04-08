@@ -23,6 +23,6 @@ function drawDisplay() {
     display[layer2Generator.upStairCase.yPos][layer2Generator.upStairCase.xPos] = 'U';
     display[layer2Generator.downStairCase.yPos][layer2Generator.downStairCase.xPos] = 'D';
 
-    display[playerPosY][playerPosX] = '@';
+    display[layer3Generator.playerPosY][layer3Generator.playerPosX] = '@';
     document.getElementById("PlayField").innerHTML = display.map(arr => arr.join('')).join('<br>');
 }

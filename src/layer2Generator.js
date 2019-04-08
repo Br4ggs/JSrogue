@@ -43,7 +43,6 @@ Layer2Generator.prototype.placeStairCases = function () {
         .filter(tile => tile !== this.upStairCase)[0];
 };
 
-//TODO return value of chests array?
 Layer2Generator.prototype.placeChests = function () {
     for (i = 0; i < this.chestPlacingAttempts; i++) {
         var room = shuffle(layer1Generator.rooms)[0];
@@ -70,11 +69,3 @@ Layer2Generator.prototype.isOccupied = function (yPos, xPos) {
 
     return false;
 };
-
-//TODO: currently not used, but could this be subclasses from a base tile class which holds the yPos and xPos value?
-//function Chest(yPos, xPos) {
-//    this.yPos = yPos;
-//    this.xPos = xPos;
-
-//    //some other smuck, like what it contains, etc...
-//}

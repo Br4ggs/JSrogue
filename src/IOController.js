@@ -1,7 +1,6 @@
 /**
  * The IOController controls the input of keys/controller data to the manager.
  */
-
 function initialize() {
     document.onkeydown = function (e) {
         switch (String.fromCharCode(e.keyCode)) {
@@ -16,6 +15,9 @@ function initialize() {
                 break;
             case 'D':
                 layer3Generator.movePlayer('RIGHT');
+                break;
+            case 'I':
+                inspect();
                 break;
         }
     };

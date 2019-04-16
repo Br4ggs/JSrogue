@@ -4,6 +4,8 @@
     <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
     <script src="src/utils.js"></script>
     <script src="src/tile.js"></script>
+    <script src="src/chest.js"></script>
+    <script src="src/staircase.js"></script>
     <script src="src/layer1Generator.js"></script>
     <script src="src/layer2Generator.js"></script>
     <script src="src/layer3Generator.js"></script>
@@ -12,6 +14,18 @@
     <script src="src/uiRenderer.js"></script>
 </head>
 <body>
+    <pre id="Title" style="font-family: Inconsolata"><b>Welcome to JSRogue!</b></pre>
     <pre id="PlayField" style="font-family: Inconsolata"></pre>
+    <pre style="font-family: Inconsolata">WASD: Move, I: Inventory, E: Interact, R: Inspect</pre>
+    <p id="Console" style="font-family: Inconsolata">
+        This is the Console.<br>
+        Quick updates on your surroundings will be posted here.<br>
+        Such as when you attack an enemy.
+    </p>
+    <p id="Environment blurp" style="font-family: Inconsolata">
+        This is where your current surrounding will be described.<br>
+        For example how lit the current room is.<br>
+        And info on the specific tile you're standing on.
+    </p>
 </body>
 </html>

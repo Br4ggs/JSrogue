@@ -37,10 +37,11 @@ Layer2Generator.prototype.placeStairCases = function () {
     var secondRoom = shuffle(layer1Generator.rooms)[0];
     var secondRoomCornerTiles = getCornerTilesFromRoom(secondRoom);
 
-    this.upStairCase = shuffle(firstRoomCornerTiles)[0];
+    var upTile = shuffle(firstRoomCornerTiles)[0];
+    this.upStairCase = new StairCase(upTile.yPos, upTile.xPos, true);
     // For the down staircase we do an extra filter to make sure there's no possibility of putting both staircases on the same tile.
-    this.downStairCase = shuffle(secondRoomCornerTiles)
-        .filter(tile => tile !== this.upStairCase)[0];
+    var downTile = shuffle(secondRoomCornerTiles).filter(tile => tile !== this.upStairCase)[0];
+    this.downStairCase = new StairCase(downTile.yPos, downTile.xPos, false);
 };
 
 Layer2Generator.prototype.placeChests = function () {
@@ -49,7 +50,7 @@ Layer2Generator.prototype.placeChests = function () {
         var tile = shuffle(room.tiles)[0];
 
         if (!this.isOccupied(tile.yPos, tile.xPos)) {
-            this.chests.push(tile);
+            this.chests.push(new Chest(tile.yPos, tile.xPos));
         }
     }
 };
@@ -69,3 +70,15 @@ Layer2Generator.prototype.isOccupied = function (yPos, xPos) {
 
     return false;
 };
+
+Layer2Generator.prototype.getObject = function (yPos, xPos) {
+    if(this.upStairCase.yPos === yPos && this.upStairCase.xPos === xPos) {
+        return this.upStairCase;
+    }
+
+    if(this.downStairCase.yPos === yPos && this.downStairCase.xPos === xPos) {
+        return this.downStairCase;
+    }
+
+    return this.chests.filter(chest => (chest.yPos === yPos && chest.xPos === xPos))[0];
+}

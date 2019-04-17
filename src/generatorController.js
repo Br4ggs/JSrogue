@@ -12,10 +12,10 @@ var layer3Generator = new Layer3Generator();
 function inspect() {
     if(layer2Generator.isOccupied(layer3Generator.playerPosY, layer3Generator.playerPosX)) {
         var object = layer2Generator.getObject(layer3Generator.playerPosY, layer3Generator.playerPosX);
-        console.log(object.description());
+        writeToConsole(object.description());
     }
     else {
-        console.log("Nothing to see here.")
+        writeToConsole("Nothing to see here.")
     }
 }
 

@@ -1,9 +1,10 @@
 /**
  * The uiRenderer is responsible for drawing the game on the screen/canvas
  */
+const maxConsoleLines = 8;
 
- /**
- * Display the current grid and the entities in it on the page.
+/**
+ * Updates the main viewport to show the latest data from the multiple dungeon layers
  */
 function drawDisplay() {
     var display = [];
@@ -25,4 +26,18 @@ function drawDisplay() {
 
     display[layer3Generator.playerPosY][layer3Generator.playerPosX] = '@';
     document.getElementById("PlayField").innerHTML = display.map(arr => arr.join('')).join('<br>');
+}
+
+function writeToConsole(message) {
+
+    //also add span for color
+    var logArray = message.concat('<br>', document.getElementById("Console").innerHTML).replace(/  +|\n/g, "").split('<br>');
+
+    if(logArray.length > maxConsoleLines) {
+        logArray.pop();
+    }
+
+    //recolor spanner elements
+
+    document.getElementById("Console").innerHTML = logArray.join('<br>');
 }

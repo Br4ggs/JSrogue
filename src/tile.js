@@ -6,11 +6,7 @@
  * A tile represents a space on the grid
  * This is only used in the first layer
  */
-function Tile(symbol, regionId, isRoom) {
-    if ( !(this instanceof Tile)){
-      return new Tile();
-    }
-
+var Tile = function(symbol, regionId, isRoom) {
     this.symbol = symbol;
     this.regionId = regionId;
     this.isRoom = isRoom;

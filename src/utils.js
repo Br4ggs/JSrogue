@@ -18,11 +18,6 @@ function getRandomIntInclusive(min, max) {
  * @param {any} array The array to shuffle.
  * @returns the shuffled array.
  */
-
-//TODO this method might be completely fucked up...
-//we want a shuffle method that does not alter the original array
-//refactor time
-//https://gomakethings.com/how-to-shuffle-an-array-with-vanilla-js/
 function shuffle(array) {
     var newArray = [...array];
 

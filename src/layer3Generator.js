@@ -1,9 +1,7 @@
-/**
- * This is just a stump, actual generation of NPC's will come later.
- */
 var Layer3Generator = function () {
-    this.playerPosY;
-    this.playerPosX;
+    this.player;
+
+    //list of enemies
 };
 
 Layer3Generator.prototype.generateLayer = function () {
@@ -28,29 +26,63 @@ Layer3Generator.prototype.setPlayerPos = function () {
 
     var playerPos = shuffle(availableTiles)[0];
 
-    this.playerPosY = playerPos.yPos;
-    this.playerPosX = playerPos.xPos;
+    this.player = new Player(playerPos.yPos, playerPos.xPos);
 };
 
-Layer3Generator.prototype.movePlayer = function (direction) {
+/**
+ * Moves an entity 1 step into a given direction.
+ * @param {String} direction the direction to move in, choose from UP, DOWN, LEFT or RIGHT.
+ * @returns {boolean} Wether the entity succesfully moved or not.
+ */
+Layer3Generator.prototype.moveEntity = function(direction) {
     switch (direction) {
         case 'UP':
-            if (isTraverseable(this.playerPosY - 1, this.playerPosX))
-                this.playerPosY--;
-            break;
+            return this.setPosition(this.player.yPos-1, this.player.xPos);
         case 'DOWN':
-            if (isTraverseable(this.playerPosY + 1, this.playerPosX))
-                this.playerPosY++;
-            break;
+            return this.setPosition(this.player.yPos+1, this.player.xPos);
         case 'LEFT':
-            if (isTraverseable(this.playerPosY, this.playerPosX - 1))
-                this.playerPosX--;
-            break;
+            return this.setPosition(this.player.yPos, this.player.xPos-1);
         case 'RIGHT':
-            if (isTraverseable(this.playerPosY, this.playerPosX + 1))
-                this.playerPosX++;
-            break;
+            return this.setPosition(this.player.yPos, this.player.xPos+1);
+        default:
+            return false;
+    }
+}
+
+/**
+ * Sets an entities position to the given values.
+ * @param {int} y The row of the tile.
+ * @param {int} x The column of the tile.
+ * @returns {boolean} Wether the entity was succesfully moved or not.
+ */
+Layer3Generator.prototype.setPosition = function (yPos, xPos) {
+    if(!isTraverseable(yPos, xPos)) {
+        return false;
     }
 
-    drawDisplay();
+    this.player.yPos = yPos;
+    this.player.xPos = xPos;
+    return true;
+};
+
+//TODO: cool feature, if enemy inspects something, and player is close enough to see.
+// document to console
+Layer3Generator.prototype.inspect = function (yPos, xPos) {
+    if(layer2Generator.isOccupied(yPos, xPos)) {
+        return layer2Generator.getObject(yPos, xPos).inspect();
+    }
+    else {
+        return null;
+    }
+};
+
+//TODO: cool feature, if enemy interacts with something, and player is close enough to see.
+// document to console
+Layer3Generator.prototype.interact = function (yPos, xPos) {
+    if(layer2Generator.isOccupied(yPos, xPos)) {
+        return layer2Generator.getObject(yPos, xPos).interact();
+    }
+    else {
+        return null;
+    }
 };

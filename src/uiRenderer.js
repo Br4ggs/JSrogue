@@ -1,7 +1,7 @@
 /**
  * The uiRenderer is responsible for drawing the game on the screen/canvas
  */
-const maxConsoleLines = 8;
+const maxConsoleLines = 4;
 
 /**
  * Updates the main viewport to show the latest data from the multiple dungeon layers
@@ -24,7 +24,7 @@ function drawDisplay() {
     display[layer2Generator.upStairCase.yPos][layer2Generator.upStairCase.xPos] = 'U';
     display[layer2Generator.downStairCase.yPos][layer2Generator.downStairCase.xPos] = 'D';
 
-    display[layer3Generator.playerPosY][layer3Generator.playerPosX] = '@';
+    display[layer3Generator.player.yPos][layer3Generator.player.xPos] = '@';
     document.getElementById("PlayField").innerHTML = display.map(arr => arr.join('')).join('<br>');
 }
 

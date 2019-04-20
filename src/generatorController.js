@@ -9,16 +9,6 @@ var layer1Generator = new Layer1Generator();
 var layer2Generator = new Layer2Generator();
 var layer3Generator = new Layer3Generator();
 
-function inspect() {
-    if(layer2Generator.isOccupied(layer3Generator.playerPosY, layer3Generator.playerPosX)) {
-        var object = layer2Generator.getObject(layer3Generator.playerPosY, layer3Generator.playerPosX);
-        writeToConsole(object.description());
-    }
-    else {
-        writeToConsole("Nothing to see here.")
-    }
-}
-
 /**
  * Checks whether the given tile is traverseable by entities.
  * @param {int} y The row of the tile.

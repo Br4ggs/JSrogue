@@ -50,7 +50,7 @@ Layer2Generator.prototype.placeChests = function () {
         var tile = shuffle(room.tiles)[0];
 
         if (!this.isOccupied(tile.yPos, tile.xPos)) {
-            this.chests.push(new Chest(tile.yPos, tile.xPos));
+            this.chests.push(new Chest(tile.yPos, tile.xPos, ["a dagger", "a knife", "a health potion"]));
         }
     }
 };

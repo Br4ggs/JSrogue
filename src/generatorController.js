@@ -19,6 +19,13 @@ function isTraverseable(y, x) {
     if (y < 0 || y > layer1Generator.rows || x < 0 || x > layer1Generator.columns)
         return false;
 
+    if (layer2Generator.isOccupied(y, x)) {
+        var object = layer2Generator.getObject(y, x);
+        if (object instanceof Door) {
+            return object.open;
+        }
+    }
+
     return layer1Generator.grid[y][x].symbol === '.';
 }
 

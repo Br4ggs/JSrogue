@@ -18,7 +18,8 @@ Layer3Generator.prototype.setPlayerPos = function () {
             if (offSetY === 0 && offSetX === 0)
                 continue;
 
-            if (layer1Generator.grid[stairPos.yPos + offSetY][stairPos.xPos + offSetX].symbol === '.') {
+            var tile = layer1Generator.grid[stairPos.yPos + offSetY][stairPos.xPos + offSetX];
+            if (tile.symbol === '.' && tile.isRoom) {
                 availableTiles.push({ yPos: stairPos.yPos + offSetY, xPos: stairPos.xPos + offSetX });
             }
         }
@@ -34,20 +35,20 @@ Layer3Generator.prototype.setPlayerPos = function () {
  * @param {String} direction the direction to move in, choose from UP, DOWN, LEFT or RIGHT.
  * @returns {boolean} Wether the entity succesfully moved or not.
  */
-Layer3Generator.prototype.moveEntity = function(direction) {
+Layer3Generator.prototype.moveEntity = function (direction) {
     switch (direction) {
         case 'UP':
-            return this.setPosition(this.player.yPos-1, this.player.xPos);
+            return this.setPosition(this.player.yPos - 1, this.player.xPos);
         case 'DOWN':
-            return this.setPosition(this.player.yPos+1, this.player.xPos);
+            return this.setPosition(this.player.yPos + 1, this.player.xPos);
         case 'LEFT':
-            return this.setPosition(this.player.yPos, this.player.xPos-1);
+            return this.setPosition(this.player.yPos, this.player.xPos - 1);
         case 'RIGHT':
-            return this.setPosition(this.player.yPos, this.player.xPos+1);
+            return this.setPosition(this.player.yPos, this.player.xPos + 1);
         default:
             return false;
     }
-}
+};
 
 /**
  * Sets an entities position to the given values.

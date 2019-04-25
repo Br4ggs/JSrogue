@@ -32,7 +32,7 @@ window.addEventListener('load', initialize);
 
 function tryPlayerMove(direction) {
     //TODO: moveEntity should be on controller
-    var result = layer3Generator.moveEntity(direction)
+    var result = layer3Generator.moveEntity(direction);
     if(result) {
         drawDisplay();
     }

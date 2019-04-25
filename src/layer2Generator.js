@@ -70,7 +70,6 @@ Layer2Generator.prototype.placeDoors = function () {
                 if (upTile.symbol === '.' && downTile.symbol === '.' && upTile.isRoom !== downTile.isRoom ||
                     leftTile.symbol === '.' && rightTile.symbol === '.' && leftTile.isRoom !== rightTile.isRoom) {
                     var newDoor = new Door(y, x);
-                    newDoor.open = true;
                     this.doors.push(newDoor);
                 }
             }
@@ -91,17 +90,27 @@ Layer2Generator.prototype.isOccupied = function (yPos, xPos) {
         return true;
     }
 
+    if (this.doors.filter(door => (door.yPos === yPos && door.xPos === xPos)).length > 0) {
+        return true;
+    }
+
     return false;
 };
 
 Layer2Generator.prototype.getObject = function (yPos, xPos) {
-    if(this.upStairCase.yPos === yPos && this.upStairCase.xPos === xPos) {
+    if (this.upStairCase.yPos === yPos && this.upStairCase.xPos === xPos) {
         return this.upStairCase;
     }
 
-    if(this.downStairCase.yPos === yPos && this.downStairCase.xPos === xPos) {
+    if (this.downStairCase.yPos === yPos && this.downStairCase.xPos === xPos) {
         return this.downStairCase;
     }
 
-    return this.chests.filter(chest => (chest.yPos === yPos && chest.xPos === xPos))[0];
-}
+    if (this.chests.filter(chest => (chest.yPos === yPos && chest.xPos === xPos)).length > 0) {
+        return this.chests.filter(chest => (chest.yPos === yPos && chest.xPos === xPos))[0];
+    }
+
+    if (this.doors.filter(door => (door.yPos === yPos && door.xPos === xPos)).length > 0) {
+        return this.doors.filter(door => (door.yPos === yPos && door.xPos === xPos))[0];
+    }
+};

@@ -29,6 +29,11 @@ function drawDisplay() {
     display[layer2Generator.downStairCase.yPos][layer2Generator.downStairCase.xPos] = 'D';
 
     display[layer3Generator.player.yPos][layer3Generator.player.xPos] = '@';
+
+    if (uiState === "SELECT") {
+        display[yCursorPos][xCursorPos] = "<mark>!</mark>";
+    }
+
     document.getElementById("PlayField").innerHTML = display.map(arr => arr.join('')).join('<br>');
 }
 

@@ -21,6 +21,10 @@ function drawDisplay() {
         display[chest.yPos][chest.xPos] = 'C';
     });
 
+    layer2Generator.doors.forEach(door => {
+        display[door.yPos][door.xPos] = '+';
+    });
+
     display[layer2Generator.upStairCase.yPos][layer2Generator.upStairCase.xPos] = 'U';
     display[layer2Generator.downStairCase.yPos][layer2Generator.downStairCase.xPos] = 'D';
 

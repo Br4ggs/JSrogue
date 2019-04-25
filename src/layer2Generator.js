@@ -1,6 +1,7 @@
 var Layer2Generator = function () {
     this.chestPlacingAttempts = 10;
     this.chests = [];
+    this.doors = [];
     this.upStairCase;
     this.downStairCase;
 };
@@ -8,6 +9,7 @@ var Layer2Generator = function () {
 Layer2Generator.prototype.generateLayer = function () {
     this.placeStairCases();
     this.placeChests();
+    this.placeDoors();
 };
 
 Layer2Generator.prototype.placeStairCases = function () {
@@ -51,6 +53,27 @@ Layer2Generator.prototype.placeChests = function () {
 
         if (!this.isOccupied(tile.yPos, tile.xPos)) {
             this.chests.push(new Chest(tile.yPos, tile.xPos, ["a dagger", "a knife", "a health potion"]));
+        }
+    }
+};
+
+Layer2Generator.prototype.placeDoors = function () {
+    for (y = 1; y < layer1Generator.rows - 1; y++) {
+        for (x = 1; x < layer1Generator.columns - 1; x++) {
+            var tile = layer1Generator.grid[y][x];
+            if (tile.symbol === '.' && !tile.isRoom) {
+                var upTile = layer1Generator.grid[y - 1][x];
+                var downTile = layer1Generator.grid[y + 1][x];
+                var leftTile = layer1Generator.grid[y][x - 1];
+                var rightTile = layer1Generator.grid[y][x + 1];
+
+                if (upTile.symbol === '.' && downTile.symbol === '.' && upTile.isRoom !== downTile.isRoom ||
+                    leftTile.symbol === '.' && rightTile.symbol === '.' && leftTile.isRoom !== rightTile.isRoom) {
+                    var newDoor = new Door(y, x);
+                    newDoor.open = true;
+                    this.doors.push(newDoor);
+                }
+            }
         }
     }
 };

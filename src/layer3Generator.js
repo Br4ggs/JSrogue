@@ -32,28 +32,18 @@ Layer3Generator.prototype.setPlayerPos = function () {
 
 /**
  * Moves an entity 1 step into a given direction.
- * @param {String} direction the direction to move in, choose from UP, DOWN, LEFT or RIGHT.
+ * @param {number} yDir the y direction to move in, can be -1 for upwards, 1 for downwards or 0 for no movement.
+ * @param {number} xDir the x direction to move in, can be -1 for left, 1 for right or 0 for no movement.
  * @returns {boolean} Wether the entity succesfully moved or not.
  */
-Layer3Generator.prototype.moveEntity = function (direction) {
-    switch (direction) {
-        case 'UP':
-            return this.setPosition(this.player.yPos - 1, this.player.xPos);
-        case 'DOWN':
-            return this.setPosition(this.player.yPos + 1, this.player.xPos);
-        case 'LEFT':
-            return this.setPosition(this.player.yPos, this.player.xPos - 1);
-        case 'RIGHT':
-            return this.setPosition(this.player.yPos, this.player.xPos + 1);
-        default:
-            return false;
-    }
+Layer3Generator.prototype.moveEntity = function (yDir, xDir) {
+    return this.setPosition(this.player.yPos + yDir, this.player.xPos + xDir);
 };
 
 /**
  * Sets an entities position to the given values.
- * @param {int} y The row of the tile.
- * @param {int} x The column of the tile.
+ * @param {int} yPos The row of the tile.
+ * @param {int} xPos The column of the tile.
  * @returns {boolean} Wether the entity was succesfully moved or not.
  */
 Layer3Generator.prototype.setPosition = function (yPos, xPos) {

@@ -40,3 +40,10 @@ function shuffle(array) {
 
     return newArray;
 }
+
+function distance(yPos1, xPos1, yPos2, xPos2) {
+    var a = xPos1 - xPos2;
+    var b = yPos1 - yPos2;
+
+    return Math.sqrt(a * a + b * b);
+}

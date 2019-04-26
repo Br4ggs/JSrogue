@@ -117,6 +117,11 @@ function playerInspect() {
 }
 
 function playerInteract() {
+    if (distance(layer3Generator.player.yPos, layer3Generator.player.xPos, yCursorPos, xCursorPos) > 1.5) {
+        writeToConsole("That object is too far away...");
+        return;
+    }
+
     var result = layer3Generator.interact(yCursorPos, xCursorPos);
     if(result !== null) {
         writeToConsole(result);

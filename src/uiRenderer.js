@@ -16,13 +16,12 @@ function drawDisplay() {
         }
     }
 
-    //TODO: call some sort of helper method that collects all objects of layer 2
     layer2Generator.chests.forEach(chest => {
         display[chest.yPos][chest.xPos] = 'C';
     });
 
     layer2Generator.doors.forEach(door => {
-        display[door.yPos][door.xPos] = '+';
+        display[door.yPos][door.xPos] = door.open ? '-' : '+';
     });
 
     display[layer2Generator.upStairCase.yPos][layer2Generator.upStairCase.xPos] = 'U';
@@ -36,6 +35,8 @@ function drawDisplay() {
 
     document.getElementById("PlayField").innerHTML = display.map(arr => arr.join('')).join('<br>');
 }
+
+//TODO: add function for updating key hints
 
 function writeToConsole(message) {
 

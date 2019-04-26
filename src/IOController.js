@@ -2,6 +2,8 @@
  * The IOController controls the player input of keys/controller data to the manager.
  */
 var keyMap = new Map();
+var keyDescriptions = new Map();
+
 var uiState;
 var xCursorPos;
 var yCursorPos;
@@ -19,16 +21,22 @@ function initialize() {
 
 window.addEventListener('load', initialize);
 
-function registerKey(key, func) {
+function registerKey(key, func, descr) {
     keyMap.set(key, func);
+    keyDescriptions.set(key, descr);
+    drawKeyDescriptor();
 }
 
 function deregisterKey(key) {
     keyMap.delete(key);
+    keyDescriptions.delete(key);
+    drawKeyDescriptor();
 }
 
 function clearMap() {
     keyMap = new Map();
+    keyDescriptions = new Map();
+    drawKeyDescriptor();
 }
 
 function setSelectMode(callback) {
@@ -38,16 +46,16 @@ function setSelectMode(callback) {
 
     clearMap();
 
-    registerKey('W', () => moveCursor('UP'));
-    registerKey('A', () => moveCursor('LEFT'));
-    registerKey('S', () => moveCursor('DOWN'));
-    registerKey('D', () => moveCursor('RIGHT'));
+    registerKey('W', () => moveCursor('UP'), "Move cursor up");
+    registerKey('A', () => moveCursor('LEFT'), "Move cursor left");
+    registerKey('S', () => moveCursor('DOWN'), "Move cursor down");
+    registerKey('D', () => moveCursor('RIGHT'), "Move cursor right");
 
-    registerKey('N', setMoveMode);
+    registerKey('N', setMoveMode, "Cancel");
     registerKey('Y', () => {
         callback();
         setMoveMode();
-    });
+    }, "Accept");
 
     drawDisplay();
 }
@@ -57,14 +65,14 @@ function setMoveMode() {
 
     clearMap();
 
-    registerKey('W', () => tryPlayerMove('UP'));
-    registerKey('A', () => tryPlayerMove('LEFT'));
-    registerKey('S', () => tryPlayerMove('DOWN'));
-    registerKey('D', () => tryPlayerMove('RIGHT'));
+    registerKey('W', () => tryPlayerMove('UP'), "Move up");
+    registerKey('A', () => tryPlayerMove('LEFT'), "Move left");
+    registerKey('S', () => tryPlayerMove('DOWN'), "Move down");
+    registerKey('D', () => tryPlayerMove('RIGHT'), "Move right");
 
-    registerKey('R', () => setSelectMode(playerInspect));
-    registerKey('E', () => setSelectMode(playerInteract));
-    registerKey('I', showInventory);
+    registerKey('R', () => setSelectMode(playerInspect), "Inspect");
+    registerKey('E', () => setSelectMode(playerInteract), "Interact");
+    registerKey('I', showInventory, "Show inventory");
 
     drawDisplay();
 }

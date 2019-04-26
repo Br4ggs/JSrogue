@@ -36,7 +36,9 @@ function drawDisplay() {
     document.getElementById("PlayField").innerHTML = display.map(arr => arr.join('')).join('<br>');
 }
 
-//TODO: add function for updating key hints
+function drawKeyDescriptor() {
+    document.getElementById("KeyDescriptor").innerHTML = Array.from(keyDescriptions, ([key, value]) => key + " : " + value).join(", ");
+}
 
 function writeToConsole(message) {
 

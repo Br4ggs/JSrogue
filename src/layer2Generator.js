@@ -67,8 +67,8 @@ Layer2Generator.prototype.placeDoors = function () {
                 var leftTile = layer1Generator.grid[y][x - 1];
                 var rightTile = layer1Generator.grid[y][x + 1];
 
-                if (upTile.symbol === '.' && downTile.symbol === '.' && upTile.isRoom !== downTile.isRoom ||
-                    leftTile.symbol === '.' && rightTile.symbol === '.' && leftTile.isRoom !== rightTile.isRoom) {
+                if (upTile.symbol === '.' && downTile.symbol === '.' && upTile.regionId !== downTile.regionId ||
+                    leftTile.symbol === '.' && rightTile.symbol === '.' && leftTile.regionId !== rightTile.regionId) {
                     var newDoor = new Door(y, x);
                     this.doors.push(newDoor);
                 }

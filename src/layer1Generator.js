@@ -143,23 +143,22 @@ Layer1Generator.prototype.createConnections = function (id) {
     var connections = [];
 
     for (y = 1; y < this.rows - 1; y++) {
-        xLoop:
         for (x = 1; x < this.columns - 1; x++) {
             if (this.grid[y][x].symbol === '#') {
                 var firstRegion = this.grid[y - 1][x];
                 var secondRegion = this.grid[y + 1][x];
 
                 if (firstRegion.symbol === '.' && secondRegion.symbol === '.' && firstRegion.regionId !== secondRegion.regionId) {
-                    connections.push({ xPos: x, yPos: y, firstId: firstRegion.regionId, secondId: secondRegion.regionId });
-                    continue xLoop;
+                    connections.push({ xPos: x, yPos: y, firstId: firstRegion.regionId, secondId: secondRegion.regionId, newId: !firstRegion.isRoom ? firstRegion.regionId : secondRegion.regionId });
+                    continue;
                 }
 
                 firstRegion = this.grid[y][x - 1];
                 secondRegion = this.grid[y][x + 1];
 
                 if (firstRegion.symbol === '.' && secondRegion.symbol === '.' && firstRegion.regionId !== secondRegion.regionId) {
-                    connections.push({ xPos: x, yPos: y, firstId: firstRegion.regionId, secondId: secondRegion.regionId });
-                    continue xLoop;
+                    connections.push({ xPos: x, yPos: y, firstId: firstRegion.regionId, secondId: secondRegion.regionId, newId: !firstRegion.isRoom ? firstRegion.regionId : secondRegion.regionId });
+                    continue;
                 }
             }
         }
@@ -169,16 +168,27 @@ Layer1Generator.prototype.createConnections = function (id) {
         connections = shuffle(connections);
 
         var filteredconn = shuffle(connections.filter(entry =>
-            (entry.firstId === connections[0].firstId && entry.secondId === connections[0].secondId ||
-                entry.firstId === connections[0].secondId && entry.secondId === connections[0].firstId)));
+            entry.firstId === connections[0].firstId && entry.secondId === connections[0].secondId ||
+                entry.firstId === connections[0].secondId && entry.secondId === connections[0].firstId));
 
-        //get a list of the connections with the desired id's
-        //shuffle this list
-        //pick the first X amount from it. you could randomize this by chance
-        //then filter all connections with desired id's from total list
         var increment = 1;
         for (i = 0; i < 3; i++) {
             if (i >= filteredconn.length) {
+                break;
+            }
+
+            var numOfFloors = 0;
+            for (let yOffset = -1; yOffset < 2; yOffset++) {
+                for (let xOffset = -1; xOffset < 2; xOffset++) {
+                    if (yOffset === xOffset || yOffset === -xOffset) {
+                        continue;
+                    }
+                    if (this.grid[filteredconn[i].yPos + yOffset][filteredconn[i].xPos + xOffset].symbol === '.') {
+                        numOfFloors++;
+                    }
+                }
+            }
+            if (numOfFloors > 2) {
                 break;
             }
 
@@ -189,14 +199,9 @@ Layer1Generator.prototype.createConnections = function (id) {
             increment -= 0.33;
 
             //add some randomness in here
-
-            this.grid[filteredconn[i].yPos][filteredconn[i].xPos] = new Tile('.', id, false); //or could give this a 'door' identity
+            this.grid[filteredconn[i].yPos][filteredconn[i].xPos] = new Tile('.', filteredconn[i].newId, false);
         }
-        id++;
 
-        //the || statement is for when the id's are still the same but are swapped when finding connections horizonally vs vertically
-        //you can remove the part after the || operator if you'd like a couple more openings
-        //or for something more controlled, try a couple more connectors of the same ID before filtering them all out
         connections = connections.filter(entry => !filteredconn.includes(entry));
     }
 

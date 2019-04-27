@@ -5,11 +5,11 @@ var Door = function (yPos, xPos) {
 };
 
 Door.prototype.inspect = function () {
-    return "A door. from the looks of it, it apears to be " + (this.open) ? "open" : "closed";
+    return "A door. From the looks of it, it apears to be " + (this.open ? "open" : "closed");
 };
 
 Door.prototype.interact = function () {
     this.open = !this.open;
 
-    return "You " + (this.open) ? "opened" : "closed" + "the door.";
+    return "You " + (this.open ? "open" : "close") + " the door.";
 };

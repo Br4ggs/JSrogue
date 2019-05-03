@@ -1,11 +1,13 @@
 var Layer3Generator = function () {
-    this.player;
+    this.maxGoblins = 8;
 
-    //list of enemies
+    this.player;
+    this.goblins = [];
 };
 
 Layer3Generator.prototype.generateLayer = function () {
     this.setPlayerPos();
+    this.spawnGoblins();
 };
 
 Layer3Generator.prototype.setPlayerPos = function () {
@@ -28,6 +30,19 @@ Layer3Generator.prototype.setPlayerPos = function () {
     var playerPos = shuffle(availableTiles)[0];
 
     this.player = new Player(playerPos.yPos, playerPos.xPos);
+};
+
+Layer3Generator.prototype.spawnGoblins = function() {
+    var playerTile = new RoomDataTile(this.player.yPos, this.player.xPos);
+    var allRoomsButPlayer = layer1Generator.rooms.filter(room => {
+        console.log(room.tiles.filter(tile => tile.yPos == playerTile.yPos && tile.xPos == playerTile.xPos).length);
+        !room.tiles.includes(playerTile);
+    });
+    //get a room, the room cannot contain the players starting position
+    //get a random number between 0 and 1
+    //get the amount of chests for this room
+    //number of goblins = (number of tiles / 10 * random number + (amount of chests / 2)roundedUp)roundedUp
+    //place goblins randomly in room
 };
 
 /**

@@ -29,6 +29,9 @@ function drawDisplay() {
 
     display[layer3Generator.player.yPos][layer3Generator.player.xPos] = '@';
 
+    layer3Generator.goblins.forEach(goblin =>
+        display[goblin.yPos][goblin.xPos] = 'G');
+
     if (uiState === "SELECT") {
         display[yCursorPos][xCursorPos] = "<mark>!</mark>";
     }

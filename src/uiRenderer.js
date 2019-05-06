@@ -17,20 +17,20 @@ function drawDisplay() {
     }
 
     layer2Generator.chests.forEach(chest => {
-        display[chest.yPos][chest.xPos] = 'C';
+        display[chest.yPos][chest.xPos] = "<font color='#E28F23'>C</font>";
     });
 
     layer2Generator.doors.forEach(door => {
-        display[door.yPos][door.xPos] = door.open ? '-' : '+';
+        display[door.yPos][door.xPos] = "<font color='#9F7640'>" + (door.open ? '-' : '+') + "</font>";
     });
 
-    display[layer2Generator.upStairCase.yPos][layer2Generator.upStairCase.xPos] = 'U';
-    display[layer2Generator.downStairCase.yPos][layer2Generator.downStairCase.xPos] = 'D';
+    display[layer2Generator.upStairCase.yPos][layer2Generator.upStairCase.xPos] = "<font color='#E23D23'>U</font>";
+    display[layer2Generator.downStairCase.yPos][layer2Generator.downStairCase.xPos] = "<font color='#E23D23'>D</font>";
 
-    display[layer3Generator.player.yPos][layer3Generator.player.xPos] = '@';
+    display[layer3Generator.player.yPos][layer3Generator.player.xPos] = "<font color='#FFF700'>@</font>";
 
     layer3Generator.goblins.forEach(goblin =>
-        display[goblin.yPos][goblin.xPos] = 'G');
+        display[goblin.yPos][goblin.xPos] = "<font color='#68F971'>G</font>");
 
     if (uiState === "SELECT") {
         display[yCursorPos][xCursorPos] = "<mark>!</mark>";

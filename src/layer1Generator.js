@@ -14,7 +14,7 @@ var Layer1Generator = function () {
     this.maxRoomRows = 4;
     this.maxRoomColumns = 12;
 
-    this.trimIterations = 5;
+    this.trimIterations = 20;
 
     //TODO: put roomOrigins in rooms as variable
     this.roomOrigins = [];
@@ -370,7 +370,6 @@ Layer1Generator.prototype.removeUnneccesaryWalls = function () {
         for (x = 0; x < this.columns; x++) {
 
             if (this.grid[y][x].symbol === '#') {
-                console.log("test");
                 for (offSetY = -1; offSetY < 2; offSetY++) {
                     if (y + offSetY < 0 || y + offSetY >= this.rows)
                         continue;

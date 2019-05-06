@@ -1,5 +1,5 @@
 var Layer2Generator = function () {
-    this.chestPlacingAttempts = 10;
+    this.chestPlacingAttempts = 8;
     this.chests = [];
     this.doors = [];
     this.upStairCase;
@@ -47,12 +47,23 @@ Layer2Generator.prototype.placeStairCases = function () {
 };
 
 Layer2Generator.prototype.placeChests = function () {
+    let placedKey = false;
+
     for (i = 0; i < this.chestPlacingAttempts; i++) {
         var room = shuffle(layer1Generator.rooms)[0];
         var tile = shuffle(room.tiles)[0];
 
         if (!this.isOccupied(tile.yPos, tile.xPos)) {
-            this.chests.push(new Chest(tile.yPos, tile.xPos, ["a dagger", "a knife", "a health potion"]));
+            if (!placedKey) {
+                this.chests.push(new Chest(tile.yPos, tile.xPos, { name: "key" }));
+                placedKey = true;
+            }
+            else if (Math.random() > 0.75) {
+                this.chests.push(new Chest(tile.yPos, tile.xPos, { name: "health potion", hp: 3 }));
+            }
+            else {
+                this.chests.push(new Chest(tile.yPos, tile.xPos, { name: "gold", amount: 2 }));
+            }
         }
     }
 };

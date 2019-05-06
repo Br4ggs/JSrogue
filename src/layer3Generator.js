@@ -34,7 +34,7 @@ Layer3Generator.prototype.setPlayerPos = function () {
 
 Layer3Generator.prototype.spawnGoblins = function() {
     var allRoomsButPlayer = layer1Generator.rooms.filter(room =>
-        room.tiles.filter(tile => tile.yPos == this.player.yPos && tile.xPos == this.player.xPos).length < 1);
+        room.tiles.filter(tile => tile.yPos === this.player.yPos && tile.xPos === this.player.xPos).length < 1);
 
     var tiles = shuffle(allRoomsButPlayer.flatMap(room => room.tiles));
 
@@ -75,24 +75,37 @@ Layer3Generator.prototype.setPosition = function (yPos, xPos) {
     return true;
 };
 
-//TODO: cool feature, if enemy inspects something, and player is close enough to see.
-// document to console
 Layer3Generator.prototype.inspect = function (yPos, xPos) {
     if(layer2Generator.isOccupied(yPos, xPos)) {
-        return layer2Generator.getObject(yPos, xPos).inspect();
+        layer2Generator.getObject(yPos, xPos).inspect();
+        return true;
     }
     else {
-        return null;
+        return false;
     }
 };
 
-//TODO: cool feature, if enemy interacts with something, and player is close enough to see.
-// document to console
 Layer3Generator.prototype.interact = function (yPos, xPos) {
-    if(layer2Generator.isOccupied(yPos, xPos)) {
-        return layer2Generator.getObject(yPos, xPos).interact();
+    if (layer2Generator.isOccupied(yPos, xPos)) {
+        layer2Generator.getObject(yPos, xPos).interact();
+        return true;
     }
     else {
-        return null;
+        return false;
     }
 };
+
+Layer3Generator.prototype.addPlayerGold = function (amount) {
+    this.player.gold += amount;
+    return `You added ${amount} to your inventory.`;
+};
+
+Layer3Generator.prototype.setPlayerKey = function (bool) {
+    this.player.hasKey = bool;
+    return "You put the key in your inventory.";
+};
+
+Layer3Generator.prototype.healPlayer = function (amount) {
+    return `You were healed ${amount} points.`;
+};
+

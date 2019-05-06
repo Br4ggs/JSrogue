@@ -103,18 +103,17 @@ function tryPlayerMove(yDir, xDir) {
         }
         else {
             writeToConsole("I can't go that direction!");
+            drawDisplay();
         }
     }
 }
 
 function playerInspect(yPos, xPos) {
     var result = layer3Generator.inspect(yPos, xPos);
-    if (result !== null) {
-        writeToConsole(result);
-    }
-    else {
+    if (!result) {
         writeToConsole("Nothing to see here...");
     }
+    drawDisplay();
 }
 
 function playerInteract(yPos, xPos) {
@@ -123,21 +122,14 @@ function playerInteract(yPos, xPos) {
         return;
     }
 
-    var result = layer3Generator.interact(yPos, xPos);
-    if (result !== null) {
-        writeToConsole(result);
-    }
-    else {
+    const result = layer3Generator.interact(yPos, xPos);
+    if (!result) {
         writeToConsole("Nothing to interact with here...");
     }
     drawDisplay();
 }
 
 function showInventory() {
-    if (layer3Generator.player.items.length < 1) {
-        writeToConsole("Your inventory is currently empty");
-    }
-    else {
-        writeToConsole("You are currently holding: " + layer3Generator.player.items.toString());
-    }
+    writeToConsole("You currently have " + layer3Generator.player.gold.toString() + " gold.");
+    writeToConsole("You currently " + (layer3Generator.player.hasKey ? "have" : "do not have") + " the key to the next floor.");
 }

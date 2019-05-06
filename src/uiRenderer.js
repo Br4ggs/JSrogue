@@ -1,7 +1,7 @@
 /**
  * The uiRenderer is responsible for drawing the game on the screen/canvas
  */
-const maxConsoleLines = 4;
+const maxConsoleLines = 5;
 
 /**
  * Updates the main viewport to show the latest data from the multiple dungeon layers

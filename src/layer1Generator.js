@@ -31,6 +31,7 @@ Layer1Generator.prototype.generateLayer = function () {
     this.mergeRooms();
     currentID = this.createConnections(currentID);
     this.trimends();
+    this.removeUnneccesaryWalls();
 };
 
 /**
@@ -360,5 +361,30 @@ Layer1Generator.prototype.generatePassageWaysPrim = function (yStartPos, xStartp
             }
         }
         walls.splice(randomIndex, 1);
+    }
+};
+
+Layer1Generator.prototype.removeUnneccesaryWalls = function () {
+    for (y = 0; y < this.rows; y++) {
+        outerXLoop:
+        for (x = 0; x < this.columns; x++) {
+
+            if (this.grid[y][x].symbol === '#') {
+                console.log("test");
+                for (offSetY = -1; offSetY < 2; offSetY++) {
+                    if (y + offSetY < 0 || y + offSetY >= this.rows)
+                        continue;
+
+                    for (offSetX = -1; offSetX < 2; offSetX++) {
+                        if (x + offSetX < 0 || x + offSetX >= this.columns)
+                            continue;
+
+                        if (this.grid[y + offSetY][x + offSetX].symbol === '.')
+                            continue outerXLoop;
+                    }
+                }
+                this.grid[y][x].symbol = ' ';
+            }
+        }
     }
 };

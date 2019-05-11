@@ -26,6 +26,7 @@ function isTraverseable(y, x) {
         }
     }
 
+    //TODO: tiles should have a field for this, shouldn't be dependant on symbol
     return layer1Generator.grid[y][x].symbol === '.';
 }
 

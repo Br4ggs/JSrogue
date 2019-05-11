@@ -9,7 +9,7 @@ var Layer2Generator = function () {
 Layer2Generator.prototype.generateLayer = function () {
     this.placeStairCases();
     this.placeChests();
-    this.placeDoors();
+    //this.placeDoors();
 };
 
 Layer2Generator.prototype.placeStairCases = function () {
@@ -46,6 +46,7 @@ Layer2Generator.prototype.placeStairCases = function () {
     this.downStairCase = new StairCase(downTile.yPos, downTile.xPos, false);
 };
 
+//TODO: use more simple goblin placement as refference
 Layer2Generator.prototype.placeChests = function () {
     let placedKey = false;
 

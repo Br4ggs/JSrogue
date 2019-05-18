@@ -49,6 +49,16 @@ Layer3Generator.prototype.spawnGoblins = function() {
     }
 };
 
+Layer3Generator.prototype.isOccupied = function (yPos, xPos) {
+    if (this.player.yPos === yPos && this.player.xPos === xPos){
+        return true;
+    }
+
+    if (this.goblins.filter(goblin => (goblin.yPos === yPos && goblin.xPos === xPos)).length > 0) {
+        return true;
+    }
+}
+
 /**
  * Moves an entity 1 step into a given direction.
  * @param {number} yDir the y direction to move in, can be -1 for upwards, 1 for downwards or 0 for no movement.
@@ -66,7 +76,7 @@ Layer3Generator.prototype.moveEntity = function (yDir, xDir) {
  * @returns {boolean} Wether the entity was succesfully moved or not.
  */
 Layer3Generator.prototype.setPosition = function (yPos, xPos) {
-    if(!isTraverseable(yPos, xPos)) {
+    if(!isTraverseable(yPos, xPos) || this.isOccupied(yPos, xPos)) {
         return false;
     }
 

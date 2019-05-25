@@ -1,22 +1,25 @@
 var Goblin = function(yPos,xPos) {
     this.yPos = yPos;
     this.xPos = xPos;
+
     this.health = 3;
 
-    this.mode = "";
+    this.roamTargetY = yPos;
+    this.roamTargetX = xPos;
+
+    this.blockCounter = 0;
+    this.maxBlockCounter = 3;
 }
 
-Goblin.prototype.getPathToPlayer = function() {
-    const {yPos: playerY, xPos: playerX} = layer3Generator.player;
-
+Goblin.prototype.getPathTo = function(yPos, xPos) {
+    //const {yPos: playerY, xPos: playerX} = layer3Generator.player;
     const frontier = [];
     const cameFrom = {};
     const cost = {};
 
-
-    frontier.push({yPos: playerY, xPos: playerX, prio: 0});
-    cameFrom[[playerY, playerX]] = null;
-    cost[[playerY, playerX]] = 0;
+    frontier.push({yPos: yPos, xPos: xPos, prio: 0});
+    cameFrom[[yPos, xPos]] = null;
+    cost[[yPos, xPos]] = 0;
 
     while(frontier.length > 0) {
 
@@ -52,34 +55,80 @@ Goblin.prototype.getPathToPlayer = function() {
     return cameFrom;
 }
 
-//if roaming, target is random tile from flood fill
-//once distance is 0 or this cannot be done, you set new target
+Goblin.prototype.setNewRoamTarget = function() {
+    const tiles = this.getReachableTiles(this.yPos, this.xPos);
+    const tile = tiles[Math.floor(Math.random()*tiles.length)];
+    ({yPos : this.roamTargetY, xPos : this.roamTargetX} = tile);
+    //take random y and x pos
+    //make this the new target
+}
 
-//if chasing, always get path to newest player position
-//if this cannot be done, set mode to roam
+Goblin.prototype.getReachableTiles = function(yPos, xPos) {
+    const traversedTiles = [];
+    const frontier = [];
 
-//TODO: make infinite loop enumerator function to test out
-Goblin.prototype.act = function() {
-    const path = this.getPathToPlayer();
-    const nextStep = path[[this.yPos, this.xPos]];
-    if(nextStep !== undefined) {
-        if(distance(this.yPos, this.xPos, layer3Generator.player.yPos, layer3Generator.player.xPos) === 1){
-            writeToConsole("the goblin attacks");
+    traversedTiles.push({yPos: yPos, xPos: xPos});
+    frontier.push({yPos: yPos, xPos: xPos});
+
+    while(frontier.length > 0) {
+        const currentTile = frontier.shift();
+
+        for (let offSetY = -1; offSetY < 2; offSetY++) {
+            for (let offSetX = -1; offSetX < 2; offSetX++) {
+
+                if (offSetY === offSetX || offSetY === -offSetX) {
+                    continue;
+                }
+              
+                if (!isTraverseable(currentTile.yPos + offSetY, currentTile.xPos + offSetX)) {
+                    continue;
+                }
+
+                if(traversedTiles.filter(tile => tile.yPos === currentTile.yPos + offSetY && tile.xPos === currentTile.xPos + offSetX).length < 1) {
+                    traversedTiles.push({yPos: currentTile.yPos + offSetY, xPos: currentTile.xPos + offSetX});
+                    frontier.push({yPos: currentTile.yPos + offSetY, xPos: currentTile.xPos + offSetX});
+                }
+            }
         }
-        else if (!layer3Generator.isOccupied(nextStep.yPos, nextStep.xPos)){
+    }
+
+    return traversedTiles;
+}
+
+Goblin.prototype.act = function() {
+    const {yPos, xPos} = layer3Generator.player;
+    let path = this.getPathTo(yPos, xPos);
+    let nextStep = path[[this.yPos, this.xPos]];
+    // if(nextStep !== undefined) {
+    //     if(distance(this.yPos, this.xPos, layer3Generator.player.yPos, layer3Generator.player.xPos) === 1){
+    //         writeToConsole("the goblin attacks");
+    //     }
+    //     else if (!layer3Generator.isOccupied(nextStep.yPos, nextStep.xPos)){
+    //         ({yPos : this.yPos, xPos : this.xPos} = nextStep);
+    //     }
+    // }
+    // else {
+        console.log("cannot find path to player");
+        // OR getpathto target returns undefined
+        //TODO: this path should only be calculated once
+        path = this.getPathTo(this.roamTargetY, this.roamTargetX);
+        nextStep = path[[this.yPos, this.xPos]];
+        //TODO: test this
+        if(distance(this.yPos, this.xPos, this.roamTargetY, this.roamTargetX) <= 1 || nextStep === undefined || this.blockCounter >= this.maxBlockCounter) {
+            this.blockCounter = 0;
+            this.setNewRoamTarget();
+        }
+        else if(layer3Generator.isOccupied(nextStep.yPos, nextStep.xPos)) {
+            this.blockCounter++;
+            console.log("added to counter");
+        }
+        else {
             ({yPos : this.yPos, xPos : this.xPos} = nextStep);
         }
-        //if the goblin is only 1 tile removed, try to attack
-        //if the goblin is more tiles removed, try to move towards player
-    }
-    else {
-        console.log("couldn't find a path");
-    }
-    //if the goblin can reach the player:
-        //if the goblin is only 1 tile removed, try to attack
-        //if the goblin is more tiles removed, try to move towards player
-
-    //if not, pick out a random tile the goblin can reach, and make this the new target
+        //check if next tile is occupied
+        //if so add one to counter
+        //if not move to new position
+    //}
 }
 
 //TODO: getPathTo method

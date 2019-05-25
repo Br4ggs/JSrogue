@@ -106,6 +106,8 @@ function tryPlayerMove(yDir, xDir) {
             drawDisplay();
         }
     }
+
+    moveGoblins();
 }
 
 function playerInspect(yPos, xPos) {

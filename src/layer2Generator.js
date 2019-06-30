@@ -9,7 +9,7 @@ var Layer2Generator = function () {
 Layer2Generator.prototype.generateLayer = function () {
     this.placeStairCases();
     this.placeChests();
-    //this.placeDoors();
+    this.placeDoors();
 };
 
 Layer2Generator.prototype.placeStairCases = function () {

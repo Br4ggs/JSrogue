@@ -12,7 +12,6 @@ var Goblin = function(yPos,xPos) {
 }
 
 Goblin.prototype.getPathTo = function(yPos, xPos) {
-    //const {yPos: playerY, xPos: playerX} = layer3Generator.player;
     const frontier = [];
     const cameFrom = {};
     const cost = {};
@@ -99,15 +98,16 @@ Goblin.prototype.act = function() {
     const {yPos, xPos} = layer3Generator.player;
     let path = this.getPathTo(yPos, xPos);
     let nextStep = path[[this.yPos, this.xPos]];
-    // if(nextStep !== undefined) {
-    //     if(distance(this.yPos, this.xPos, layer3Generator.player.yPos, layer3Generator.player.xPos) === 1){
-    //         writeToConsole("the goblin attacks");
-    //     }
-    //     else if (!layer3Generator.isOccupied(nextStep.yPos, nextStep.xPos)){
-    //         ({yPos : this.yPos, xPos : this.xPos} = nextStep);
-    //     }
-    // }
-    // else {
+
+    if(nextStep !== undefined) {
+        if(distance(this.yPos, this.xPos, layer3Generator.player.yPos, layer3Generator.player.xPos) === 1){
+            writeToConsole("the goblin attacks");
+        }
+        else if (!layer3Generator.isOccupied(nextStep.yPos, nextStep.xPos)){
+            ({yPos : this.yPos, xPos : this.xPos} = nextStep);
+        }
+    }
+    else {
         console.log("cannot find path to player");
         // OR getpathto target returns undefined
         //TODO: this path should only be calculated once
@@ -125,13 +125,8 @@ Goblin.prototype.act = function() {
         else {
             ({yPos : this.yPos, xPos : this.xPos} = nextStep);
         }
-        //check if next tile is occupied
-        //if so add one to counter
-        //if not move to new position
-    //}
+    }
 }
-
-//TODO: getPathTo method
 
 function moveGoblins() {
     console.log("doot");

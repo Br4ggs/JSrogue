@@ -3,7 +3,8 @@ var Goblin = function(yPos,xPos) {
     this.yPos = yPos;
     this.xPos = xPos;
 
-    this.health = 4;
+    this.maxHealth = 4;
+    this.health = this.maxHealth;
     this.attackPwr = 1;
 
     this.roamTargetY = yPos;

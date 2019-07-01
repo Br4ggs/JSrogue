@@ -89,6 +89,9 @@ function moveCursor(yDir, xDir) {
     drawDisplay();
 }
 
+//TODO: rework chests into simple items laying on the ground
+//you can pick them up manually but they will automatically be picked up as soon as you walk over them
+
 //TODO: this could be turned into a tryMoveAction object
 function tryPlayerMove(yDir, xDir) {
     var result = layer3Generator.moveEntity(yDir, xDir);
@@ -99,15 +102,15 @@ function tryPlayerMove(yDir, xDir) {
     else {
         //TODO: with an entity component system you dont have to make this distinction,
         // so everything could be in one domain
-        if (layer2Generator.isOccupied(layer3Generator.player.yPos + yDir, layer3Generator.player.xPos + xDir)) {
+        if (layer3Generator.isOccupied(layer3Generator.player.yPos + yDir, layer3Generator.player.xPos + xDir)){
+            playerAttack(layer3Generator.player.yPos + yDir, layer3Generator.player.xPos + xDir);
+        }
+        else if (layer2Generator.isOccupied(layer3Generator.player.yPos + yDir, layer3Generator.player.xPos + xDir)) {
             const obj = layer2Generator.getObject(layer3Generator.player.yPos + yDir, layer3Generator.player.xPos + xDir);
 
             if (obj instanceof Door) {
                 playerInteract(layer3Generator.player.yPos + yDir, layer3Generator.player.xPos + xDir);
             }
-        }
-        else if (layer3Generator.isOccupied(layer3Generator.player.yPos + yDir, layer3Generator.player.xPos + xDir)){
-            playerAttack(layer3Generator.player.yPos + yDir, layer3Generator.player.xPos + xDir);
         }
         else {
             writeToConsole("I can't go that direction!");

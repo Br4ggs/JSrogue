@@ -9,6 +9,11 @@ Door.prototype.inspect = function () {
 };
 
 Door.prototype.interact = function () {
+    if (layer3Generator.isOccupied(this.yPos, this.xPos)) {
+        writeToConsole("There's something in the way!");
+        return;
+    }
+
     this.open = !this.open;
 
     writeToConsole("You " + (this.open ? "open" : "close") + " the door.");

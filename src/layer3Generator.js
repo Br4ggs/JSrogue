@@ -146,6 +146,10 @@ Layer3Generator.prototype.setPlayerKey = function (bool) {
 };
 
 Layer3Generator.prototype.healPlayer = function (amount) {
+    this.player.health += amount;
+    if (this.player.health > this.player.maxHealth) {
+        this.player.health = this.player.maxHealth;
+    }
     return `You were healed ${amount} points.`;
 };
 

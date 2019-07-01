@@ -1,8 +1,10 @@
 var Goblin = function(yPos,xPos) {
+    this.id = generateId();
     this.yPos = yPos;
     this.xPos = xPos;
 
-    this.health = 3;
+    this.health = 4;
+    this.attackPwr = 1;
 
     this.roamTargetY = yPos;
     this.roamTargetX = xPos;
@@ -58,8 +60,6 @@ Goblin.prototype.setNewRoamTarget = function() {
     const tiles = this.getReachableTiles(this.yPos, this.xPos);
     const tile = tiles[Math.floor(Math.random()*tiles.length)];
     ({yPos : this.roamTargetY, xPos : this.roamTargetX} = tile);
-    //take random y and x pos
-    //make this the new target
 }
 
 Goblin.prototype.getReachableTiles = function(yPos, xPos) {
@@ -101,7 +101,7 @@ Goblin.prototype.act = function() {
 
     if(nextStep !== undefined) {
         if(distance(this.yPos, this.xPos, layer3Generator.player.yPos, layer3Generator.player.xPos) === 1){
-            writeToConsole("the goblin attacks");
+            layer3Generator.attack(this, layer3Generator.player.yPos, layer3Generator.player.xPos);
         }
         else if (!layer3Generator.isOccupied(nextStep.yPos, nextStep.xPos)){
             ({yPos : this.yPos, xPos : this.xPos} = nextStep);
@@ -113,7 +113,7 @@ Goblin.prototype.act = function() {
         //TODO: this path should only be calculated once
         path = this.getPathTo(this.roamTargetY, this.roamTargetX);
         nextStep = path[[this.yPos, this.xPos]];
-        //TODO: test this
+
         if(distance(this.yPos, this.xPos, this.roamTargetY, this.roamTargetX) <= 1 || nextStep === undefined || this.blockCounter >= this.maxBlockCounter) {
             this.blockCounter = 0;
             this.setNewRoamTarget();
@@ -128,6 +128,7 @@ Goblin.prototype.act = function() {
     }
 }
 
+//TODO: move to ai actor class or something?
 function moveGoblins() {
     console.log("doot");
     layer3Generator.goblins.forEach(goblin => goblin.act());

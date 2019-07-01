@@ -53,8 +53,8 @@ function setSelectMode(callback) {
 
     registerKey('N', setMoveMode, "Cancel");
     registerKey('Y', () => {
-        callback();
         setMoveMode();
+        callback();
     }, "Accept");
 
     drawDisplay();
@@ -72,7 +72,8 @@ function setMoveMode() {
 
     registerKey('R', () => setSelectMode(() => playerInspect(yCursorPos, xCursorPos)), "Inspect");
     registerKey('E', () => setSelectMode(() => playerInteract(yCursorPos, xCursorPos)), "Interact");
-    registerKey('I', showInventory, "Show inventory");
+    registerKey('T', () => setSelectMode(() => playerAttack(yCursorPos, xCursorPos)), "Attack");
+    registerKey('Y', showInventory, "Show inventory");
 
     drawDisplay();
 }
@@ -88,26 +89,32 @@ function moveCursor(yDir, xDir) {
     drawDisplay();
 }
 
+//TODO: this could be turned into a tryMoveAction object
 function tryPlayerMove(yDir, xDir) {
     var result = layer3Generator.moveEntity(yDir, xDir);
     if (result) {
+        moveGoblins();
         drawDisplay();
     }
     else {
+        //TODO: with an entity component system you dont have to make this distinction,
+        // so everything could be in one domain
         if (layer2Generator.isOccupied(layer3Generator.player.yPos + yDir, layer3Generator.player.xPos + xDir)) {
-            var obj = layer2Generator.getObject(layer3Generator.player.yPos + yDir, layer3Generator.player.xPos + xDir);
+            const obj = layer2Generator.getObject(layer3Generator.player.yPos + yDir, layer3Generator.player.xPos + xDir);
 
             if (obj instanceof Door) {
                 playerInteract(layer3Generator.player.yPos + yDir, layer3Generator.player.xPos + xDir);
             }
         }
+        else if (layer3Generator.isOccupied(layer3Generator.player.yPos + yDir, layer3Generator.player.xPos + xDir)){
+            playerAttack(layer3Generator.player.yPos + yDir, layer3Generator.player.xPos + xDir);
+        }
         else {
             writeToConsole("I can't go that direction!");
+            moveGoblins();
             drawDisplay();
         }
     }
-
-    moveGoblins();
 }
 
 function playerInspect(yPos, xPos) {
@@ -128,10 +135,34 @@ function playerInteract(yPos, xPos) {
     if (!result) {
         writeToConsole("Nothing to interact with here...");
     }
+
+    moveGoblins();
+    drawDisplay();
+}
+
+function playerAttack(yPos, xPos) {
+    if (distance(layer3Generator.player.yPos, layer3Generator.player.xPos, yPos, xPos) > 1.5) {
+        writeToConsole("That is too far away...");
+        return;
+    }
+
+    const result = layer3Generator.attack(layer3Generator.player, yPos, xPos);
+    if (!result) {
+        writeToConsole("You swing your sword at nothing...");
+    }
+
+    moveGoblins();
     drawDisplay();
 }
 
 function showInventory() {
     writeToConsole("You currently have " + layer3Generator.player.gold.toString() + " gold.");
     writeToConsole("You currently " + (layer3Generator.player.hasKey ? "have" : "do not have") + " the key to the next floor.");
+}
+
+function gameOver() {
+    clearMap();
+    registerKey('R', () => null, "Restart");
+    writeToConsole("You died, press R to restart");
+    drawDisplay();
 }

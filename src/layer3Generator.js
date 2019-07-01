@@ -59,22 +59,33 @@ Layer3Generator.prototype.isOccupied = function (yPos, xPos) {
     }
 }
 
-/**
- * Moves an entity 1 step into a given direction.
- * @param {number} yDir the y direction to move in, can be -1 for upwards, 1 for downwards or 0 for no movement.
- * @param {number} xDir the x direction to move in, can be -1 for left, 1 for right or 0 for no movement.
- * @returns {boolean} Wether the entity succesfully moved or not.
- */
+Layer3Generator.prototype.getEntity = function (yPos, xPos) {
+    if (this.player.yPos === yPos && this.player.xPos === xPos){
+        return this.player;
+    }
+    const filteredGoblins = this.goblins.filter(goblin => (goblin.yPos === yPos && goblin.xPos === xPos));
+    if (filteredGoblins.length === 1) {
+        return filteredGoblins[0];
+    }
+}
+
 Layer3Generator.prototype.moveEntity = function (yDir, xDir) {
     return this.setPosition(this.player.yPos + yDir, this.player.xPos + xDir);
 };
 
-/**
- * Sets an entities position to the given values.
- * @param {int} yPos The row of the tile.
- * @param {int} xPos The column of the tile.
- * @returns {boolean} Wether the entity was succesfully moved or not.
- */
+Layer3Generator.prototype.registerEntity = function () {
+    //TODO: 
+};
+
+Layer3Generator.prototype.removeEntity = function (entity) {
+    if(entity.constructor.name === "Player") {
+        gameOver();
+    }
+
+    this.goblins = this.goblins.filter(goblin => (goblin.id !== entity.id));
+
+};
+
 Layer3Generator.prototype.setPosition = function (yPos, xPos) {
     if(!isTraverseable(yPos, xPos) || this.isOccupied(yPos, xPos)) {
         return false;
@@ -104,6 +115,25 @@ Layer3Generator.prototype.interact = function (yPos, xPos) {
         return false;
     }
 };
+//TODO: this is getting too complicated for a simple boolean expression, this should probably be replaced
+//by some kind of log
+Layer3Generator.prototype.attack = function (caller, yPos, xPos) {
+    if (this.isOccupied(yPos, xPos)) {
+        const entity = this.getEntity(yPos, xPos);
+        entity.health -= caller.attackPwr;
+
+        writeToConsole(`The ${caller.constructor.name} hit the ${entity.constructor.name} for ${caller.attackPwr} damage.`);
+
+        if(entity.health <= 0) {
+            writeToConsole(`The ${entity.constructor.name} died.`);
+            this.removeEntity(entity);
+        }
+        return true;
+    }
+    else {
+        return false;
+    }
+}
 
 Layer3Generator.prototype.addPlayerGold = function (amount) {
     this.player.gold += amount;

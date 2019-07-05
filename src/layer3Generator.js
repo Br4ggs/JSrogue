@@ -12,7 +12,7 @@ Layer3Generator.prototype.generateLayer = function () {
 
 Layer3Generator.prototype.setPlayerPos = function () {
 
-    var stairPos = layer2Generator.downStairCase;
+    var stairPos = layer2Generator.upStairCase;
     var availableTiles = [];
 
     for (var offSetY = -1; offSetY < 2; offSetY++) {

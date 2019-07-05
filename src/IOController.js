@@ -108,7 +108,7 @@ function tryPlayerMove(yDir, xDir) {
         else if (layer2Generator.isOccupied(layer3Generator.player.yPos + yDir, layer3Generator.player.xPos + xDir)) {
             const obj = layer2Generator.getObject(layer3Generator.player.yPos + yDir, layer3Generator.player.xPos + xDir);
 
-            if (obj instanceof Door) {
+            if (obj instanceof Door || obj instanceof StairCase) {
                 playerInteract(layer3Generator.player.yPos + yDir, layer3Generator.player.xPos + xDir);
             }
         }

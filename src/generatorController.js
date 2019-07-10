@@ -44,6 +44,7 @@ function generateLevel() {
     layer3Generator.generateLayer();
 
     drawDisplay();
+    drawHealthIndicator();
 }
 
 //Really lazy but this is gonna get overhauled anyway

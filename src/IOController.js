@@ -98,6 +98,7 @@ function tryPlayerMove(yDir, xDir) {
     if (result) {
         moveGoblins();
         drawDisplay();
+        drawHealthIndicator();
     }
     else {
         //TODO: with an entity component system you dont have to make this distinction,
@@ -116,6 +117,7 @@ function tryPlayerMove(yDir, xDir) {
             writeToConsole("I can't go that direction!");
             moveGoblins();
             drawDisplay();
+            drawHealthIndicator();
         }
     }
 }
@@ -125,7 +127,6 @@ function playerInspect(yPos, xPos) {
     if (!result) {
         writeToConsole("Nothing to see here...");
     }
-    drawDisplay();
 }
 
 function playerInteract(yPos, xPos) {
@@ -141,6 +142,7 @@ function playerInteract(yPos, xPos) {
 
     moveGoblins();
     drawDisplay();
+    drawHealthIndicator();
 }
 
 function playerAttack(yPos, xPos) {
@@ -156,6 +158,7 @@ function playerAttack(yPos, xPos) {
 
     moveGoblins();
     drawDisplay();
+    drawHealthIndicator();
 }
 
 function showInventory() {
@@ -168,4 +171,5 @@ function gameOver() {
     registerKey('R', () => null, "Restart");
     writeToConsole("You died, press R to restart");
     drawDisplay();
+    drawHealthIndicator();
 }

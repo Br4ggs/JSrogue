@@ -1,7 +1,7 @@
 /**
  * The uiRenderer is responsible for drawing the game on the screen/canvas
  */
-const maxConsoleLines = 7;
+const maxConsoleLines = 5;
 
 /**
  * Updates the main viewport to show the latest data from the multiple dungeon layers
@@ -41,6 +41,10 @@ function drawDisplay() {
 
 function drawKeyDescriptor() {
     document.getElementById("KeyDescriptor").innerHTML = Array.from(keyDescriptions, ([key, value]) => key + " : " + value).join(", ");
+}
+
+function drawHealthIndicator() {
+    document.getElementById("HealthIndicator").innerHTML = "Health: " + layer3Generator.player.health + "/" + layer3Generator.player.maxHealth;
 }
 
 function writeToConsole(message) {

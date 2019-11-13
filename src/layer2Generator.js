@@ -46,6 +46,7 @@ Layer2Generator.prototype.placeStairCases = function () {
     this.downStairCase = new StairCase(downTile.yPos, downTile.xPos, false);
 };
 
+//TODO: use more simple goblin placement as refference
 Layer2Generator.prototype.placeChests = function () {
     let placedKey = false;
 

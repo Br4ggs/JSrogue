@@ -46,6 +46,10 @@ function drawKeyDescriptor() {
     document.getElementById("KeyDescriptor").innerHTML = Array.from(keyDescriptions, ([key, value]) => key + " : " + value).join(", ");
 }
 
+function drawHealthIndicator() {
+    document.getElementById("HealthIndicator").innerHTML = "Health: " + layer3Generator.player.health + "/" + layer3Generator.player.maxHealth;
+}
+
 function writeToConsole(message) {
 
     //also add span for color

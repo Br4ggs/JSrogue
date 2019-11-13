@@ -10,7 +10,17 @@ StairCase.prototype.inspect = function () {
 };
 
 StairCase.prototype.interact = function () {
-    //initiate new level generation
-    var dir = (this.direction ? "upwards" : "downwards");
-    writeToConsole(`This will take you a level ${dir}`);
+    if(this.direction) {
+        writeToConsole("The staircase is locked.");
+    }
+    else {
+        if(!layer3Generator.player.hasKey) {
+            writeToConsole("You do not have the key for the staircase.");
+            return;
+        }
+
+        writeToConsole("You enter the staircase and traverse to the lower level.");
+        layer3Generator.player.hasKey = false;
+        nextLevel();
+    }
 };

@@ -244,7 +244,7 @@ Layer1Generator.prototype.trimends = function () {
     }
 };
 
-//TODO this can look better
+//TODO: this can look better
 Layer1Generator.prototype.generatePassageWaysPrim = function (yStartPos, xStartpos, id) {
     var walls = [];
     this.grid[yStartPos][xStartpos] = new Tile('.', id, false);

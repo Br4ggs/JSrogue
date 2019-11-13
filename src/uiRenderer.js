@@ -13,6 +13,9 @@ function drawDisplay() {
         display[y] = [];
         for (x = 0; x < layer1Generator.columns; x++) {
             display[y][x] = layer1Generator.grid[y][x].symbol;
+            if (display[y][x] === '#') {
+                display[y][x] = '&block;';
+            }
         }
     }
 

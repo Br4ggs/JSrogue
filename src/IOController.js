@@ -168,7 +168,7 @@ function showInventory() {
 
 function gameOver() {
     clearMap();
-    registerKey('R', () => null, "Restart");
+    registerKey('R', () => restart(), "Restart");
     writeToConsole("You died, press R to restart");
     drawDisplay();
     drawHealthIndicator();

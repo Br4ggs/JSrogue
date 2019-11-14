@@ -50,19 +50,24 @@ function generateLevel() {
 //Really lazy but this is gonna get overhauled anyway
 function nextLevel() {
     const playerData = layer3Generator.player;
-    console.log(playerData);
     layer1Generator = new Layer1Generator();
     layer2Generator = new Layer2Generator();
     layer3Generator = new Layer3Generator();
 
     generateLevel();
-    console.log(playerData);
-
 
     layer3Generator.player.id = playerData.id;
     layer3Generator.player.health = playerData.health;
     layer3Generator.player.gold = playerData.gold;
-    writeToConsole("The staircase locks behind you.")
+    writeToConsole("The staircase locks behind you.");
+}
+
+function restart() {
+    layer1Generator = new Layer1Generator();
+    layer2Generator = new Layer2Generator();
+    layer3Generator = new Layer3Generator();
+    generateLevel();
+    setMoveMode();
 }
 
 window.addEventListener('load', generateLevel);

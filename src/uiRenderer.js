@@ -19,8 +19,18 @@ function drawDisplay() {
         }
     }
 
-    layer2Generator.chests.forEach(chest => {
-        display[chest.yPos][chest.xPos] = "<font color='#E28F23'>C</font>";
+    layer2Generator.items.forEach(item => {
+        switch (item.constructor) {
+            case Key:
+                display[item.yPos][item.xPos] = "<font color='#FF5733'>k</font>";
+                break;
+            case Potion:
+                display[item.yPos][item.xPos] = "<font color='#F033F2'>p</font>";
+                break;
+            case GoldSack:
+                display[item.yPos][item.xPos] = "<font color='#FFC300'>g</font>";
+                break;
+        }
     });
 
     layer2Generator.doors.forEach(door => {

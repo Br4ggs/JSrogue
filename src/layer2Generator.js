@@ -1,6 +1,6 @@
 var Layer2Generator = function () {
-    this.chestPlacingAttempts = 8;
-    this.chests = [];
+    this.maxItems = 8;
+    this.items = [];
     this.doors = [];
     this.upStairCase;
     this.downStairCase;
@@ -8,7 +8,7 @@ var Layer2Generator = function () {
 
 Layer2Generator.prototype.generateLayer = function () {
     this.placeStairCases();
-    this.placeChests();
+    this.placeItems();
     this.placeDoors();
 };
 
@@ -46,25 +46,26 @@ Layer2Generator.prototype.placeStairCases = function () {
     this.downStairCase = new StairCase(downTile.yPos, downTile.xPos, false);
 };
 
-//TODO: use more simple goblin placement as refference
-Layer2Generator.prototype.placeChests = function () {
+Layer2Generator.prototype.placeItems = function () {
     let placedKey = false;
+    let tiles = shuffle(layer1Generator.rooms.flatMap(room => room.tiles));
 
-    for (i = 0; i < this.chestPlacingAttempts; i++) {
-        var room = shuffle(layer1Generator.rooms)[0];
-        var tile = shuffle(room.tiles)[0];
-
-        if (!this.isOccupied(tile.yPos, tile.xPos)) {
-            if (!placedKey) {
-                this.chests.push(new Chest(tile.yPos, tile.xPos, { name: "key" }));
-                placedKey = true;
-            }
-            else if (Math.random() > 0.75) {
-                this.chests.push(new Chest(tile.yPos, tile.xPos, { name: "health potion", hp: 3 }));
-            }
-            else {
-                this.chests.push(new Chest(tile.yPos, tile.xPos, { name: "gold", amount: 2 }));
-            }
+    let placedItems = 0;
+    while(tiles.length > 0) {
+        const tile = tiles.pop();
+        if (!placedKey) {
+            this.registerObject(new Key(tile.yPos, tile.xPos));
+            placedKey = true;
+        }
+        else if (Math.random() > 0.75) {
+            this.registerObject(new Potion(tile.yPos, tile.xPos, 3));
+        }
+        else {
+            this.registerObject(new GoldSack(tile.yPos, tile.xPos, 2));
+        }
+        placedItems++;
+        if(placedItems >= this.maxItems){
+            break;
         }
     }
 };
@@ -98,7 +99,7 @@ Layer2Generator.prototype.isOccupied = function (yPos, xPos) {
         return true;
     }
 
-    if (this.chests.filter(chest => (chest.yPos === yPos && chest.xPos === xPos)).length > 0) {
+    if (this.items.filter(item => (item.yPos === yPos && item.xPos === xPos)).length > 0) {
         return true;
     }
 
@@ -118,11 +119,19 @@ Layer2Generator.prototype.getObject = function (yPos, xPos) {
         return this.downStairCase;
     }
 
-    if (this.chests.filter(chest => (chest.yPos === yPos && chest.xPos === xPos)).length > 0) {
-        return this.chests.filter(chest => (chest.yPos === yPos && chest.xPos === xPos))[0];
+    if (this.items.filter(item => (item.yPos === yPos && item.xPos === xPos)).length > 0) {
+        return this.items.filter(item => (item.yPos === yPos && item.xPos === xPos))[0];
     }
 
     if (this.doors.filter(door => (door.yPos === yPos && door.xPos === xPos)).length > 0) {
         return this.doors.filter(door => (door.yPos === yPos && door.xPos === xPos))[0];
     }
+};
+
+Layer2Generator.prototype.registerObject = function (addedItem) {
+    this.items.push(addedItem);
+};
+
+Layer2Generator.prototype.removeObject = function (removedItem) {
+    this.items = this.items.filter(item => (item.id !== removedItem.id));
 };

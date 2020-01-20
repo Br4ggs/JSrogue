@@ -69,6 +69,7 @@ Layer3Generator.prototype.getEntity = function (yPos, xPos) {
     }
 }
 
+//TODO: these need to be general methods, not just for player
 Layer3Generator.prototype.moveEntity = function (yDir, xDir) {
     return this.setPosition(this.player.yPos + yDir, this.player.xPos + xDir);
 };

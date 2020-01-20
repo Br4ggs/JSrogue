@@ -89,13 +89,16 @@ function moveCursor(yDir, xDir) {
     drawDisplay();
 }
 
-//TODO: rework chests into simple items laying on the ground
-//you can pick them up manually but they will automatically be picked up as soon as you walk over them
-
 //TODO: this could be turned into a tryMoveAction object
 function tryPlayerMove(yDir, xDir) {
     var result = layer3Generator.moveEntity(yDir, xDir);
     if (result) {
+        if (layer2Generator.isOccupied(layer3Generator.player.yPos, layer3Generator.player.xPos)) {
+            const obj = layer2Generator.getObject(layer3Generator.player.yPos, layer3Generator.player.xPos);
+            if (obj instanceof Item) {
+                playerInteract(layer3Generator.player.yPos, layer3Generator.player.xPos);
+            }
+        }
         moveGoblins();
         drawDisplay();
         drawHealthIndicator();

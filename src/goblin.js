@@ -109,7 +109,7 @@ Goblin.prototype.act = function() {
         }
     }
     else {
-        console.log("cannot find path to player");
+        //console.log("cannot find path to player");
         // OR getpathto target returns undefined
         //TODO: this path should only be calculated once
         path = this.getPathTo(this.roamTargetY, this.roamTargetX);
@@ -121,7 +121,7 @@ Goblin.prototype.act = function() {
         }
         else if(layer3Generator.isOccupied(nextStep.yPos, nextStep.xPos)) {
             this.blockCounter++;
-            console.log("added to counter");
+            //console.log("added to counter");
         }
         else {
             ({yPos : this.yPos, xPos : this.xPos} = nextStep);
@@ -131,7 +131,6 @@ Goblin.prototype.act = function() {
 
 //TODO: move to ai actor class or something?
 function moveGoblins() {
-    console.log("doot");
     layer3Generator.goblins.forEach(goblin => goblin.act());
-    drawDisplay();
+    //drawDisplay();
 }

@@ -41,6 +41,14 @@ function shuffle(array) {
     return newArray;
 }
 
+/**
+ * Gives the distance between 2 points.
+ * @param {number} yPos1 Y position of first point.
+ * @param {number} xPos1 X position of first point.
+ * @param {number} yPos2 Y position of second point.
+ * @param {number} xPos2 X position of second point.
+ * @returns {number} Distance between the 2 point.
+ */
 function distance(yPos1, xPos1, yPos2, xPos2) {
     var a = xPos1 - xPos2;
     var b = yPos1 - yPos2;
@@ -48,8 +56,26 @@ function distance(yPos1, xPos1, yPos2, xPos2) {
     return Math.sqrt(a * a + b * b);
 }
 
+/**
+ * Generates a unique ID.
+ * @returns {string} the ID.
+ */
 function generateId() {
     return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
       (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     )
+}
+
+/**
+ * Calculates the slope of 2 given points.
+ * @param {number} yPos1 Y position of the first point.
+ * @param {number} xPos1 X position of the first point.
+ * @param {number} yPos2 Y position of the second point.
+ * @param {number} xPos2 X position of the second point.
+ */
+function calculateSlope(yPos1, xPos1, yPos2, xPos2) {
+    const x = xPos2 - xPos1;
+    const y = yPos2 - yPos1;
+
+    return x/y;
 }

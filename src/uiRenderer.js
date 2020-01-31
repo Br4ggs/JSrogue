@@ -11,8 +11,6 @@ const maxConsoleLines = 5;
  */
 function drawDisplay() {
     //TODO:
-    //-draw octant
-    //-draw 8 octants surrounding the player
     //-try shadowcast
 
     let visibleTiles = generateVisibility();
@@ -114,15 +112,18 @@ function generateVisibility() {
     let visibleTiles = [];
     //generate 8 octants
     //merge them into single list
-    for (i = 0; i < 8; i++) {
-        visibleTiles = visibleTiles.concat(generateOctant(layer3Generator.player.xPos, layer3Generator.player.yPos, 10, i));
+    for (i = 0; i < 1; i++) {
+        visibleTiles = visibleTiles.concat(generateOctant(layer3Generator.player.xPos, layer3Generator.player.yPos, 4, 0));
     }
     //filter and return
     return visibleTiles;
 }
 
+//TODO: generate slopes of opaque tile transitions
 //will generate a visibility bitmap of octant, point of view being 0,0
 function generateOctant(startXpos, startYpos, length, orientation) {
+    let previousTileOpaque = false;
+    let inShadow = false;
     let visibleTiles = [];
     let shadowSlopes = [];
     for (y = 0; y < length; y++) {
@@ -140,8 +141,37 @@ function generateOctant(startXpos, startYpos, length, orientation) {
             //TODO: also abstract this with a bounds checking function
             if(pos.xPos < 0 || pos.xPos > layer1Generator.columns - 1) break;
             if(pos.yPos < 0 || pos.yPos > layer1Generator.rows - 1) break;
+
+            let currentTileOpaque = layer1Generator.grid[pos.yPos][pos.xPos].symbol === '#';
+
+            //shadow boundary calculation
+            //if x = 0, set previoustileOpaque to false
+            if (x === 0) {
+                previousTileOpaque = false;
+            }
+
+            //at end of loop set previousTileOpaque to wether current tile is a wall or not
+            //if transition from non-opaque to opaque is found(!previousTileOpaque && currentTileOpaque), calculateUppershadowSlope for current tile
+            if (!previousTileOpaque && currentTileOpaque) {
+                console.log("entering wall block on Y: " + y + " X: " + x);
+            }
+            //if transition from opaque to non-opaque is found(previousTileOpaque && !currentTileOpaque), calculateLowerShadowSlope for current tile - 1 on x coord
+            if (previousTileOpaque && !currentTileOpaque) {
+                console.log("exiting wall block on Y: " + y + " X: " + x)
+            }
+            
+            //if opaque tile is found on x = 0, calculateUpperShadowSlope for current tile (?)
+            //if opaque tile is found on last x for row, calculateLowerShadowSlope for current tile
+            if(currentTileOpaque && x === y) {
+                console.log("wall on last tile of row on Y: " + y + " X: " + x);
+            }
+
             //then calculate whether to skip, draw or add a shadow slope based on shadowcast calculation
+            //TODO: if transitioned to or from opaque tile, calculate a boundary slope.
+            //either a shadowstart or shadowend
             visibleTiles.push(pos);
+
+            previousTileOpaque = currentTileOpaque;
         }
     }
 
@@ -159,4 +189,16 @@ function transformOctant(y, x, orientation) {
         case 6: return {yPos: -x, xPos: y};
         case 7: return {yPos: x, xPos: y};
     }
+}
+
+function calculateUpperShadowSlope(yPos, xPos) {
+    const y = yPos + 0.5;
+    const x = xPos - 0.5;
+    return calculateSlope(0,0,y,x);
+}
+
+function calculateLowerShadowSlope(yPos, xPos) {
+    const y = yPos - 0.5;
+    const x = xPos + 0.5;
+    return calculateSlope(0,0,y,x);
 }

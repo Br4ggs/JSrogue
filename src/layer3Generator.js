@@ -7,7 +7,7 @@ var Layer3Generator = function () {
 
 Layer3Generator.prototype.generateLayer = function () {
     this.setPlayerPos();
-    this.spawnGoblins();
+    //this.spawnGoblins();
 };
 
 Layer3Generator.prototype.setPlayerPos = function () {

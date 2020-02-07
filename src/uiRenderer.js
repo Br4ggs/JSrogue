@@ -20,26 +20,15 @@ function drawDisplay() {
     var display = [];
     
     //refresh display area
-    for (y = 0; y < layer1Generator.rows; y++) {
-        display[y] = [];
-        for (x = 0; x < layer1Generator.columns; x++) {
-            //if tile is in seen tiles list, display it as dark grey
-            display[y][x] = ' ';
-        }
-    }
+    // for (y = 0; y < layer1Generator.rows; y++) {
+    //     display[y] = [];
+    //     for (x = 0; x < layer1Generator.columns; x++) {
+    //         //if tile is in seen tiles list, display it as dark grey
+    //         display[y][x] = ' ';
+    //     }
+    // }
 
-    visibleTiles.forEach(tile => {
-        display[tile.yPos][tile.xPos] = layer1Generator.grid[tile.yPos][tile.xPos].symbol;
-        if (display[tile.yPos][tile.xPos] === '#') {
-            display[tile.yPos][tile.xPos] = '&block;';
-        }
-    });
-
-    display[layer3Generator.player.yPos][layer3Generator.player.xPos] = "<font color='#FFF700'>@</font>";
-    document.getElementById("PlayField").innerHTML = display.map(arr => arr.join('')).join('<br>');
-
-
-    return
+    //return
     //old stuff
     for (y = 0; y < layer1Generator.rows; y++) {
         display[y] = [];
@@ -81,6 +70,13 @@ function drawDisplay() {
         display[yCursorPos][xCursorPos] = "<mark>!</mark>";
     }
 
+    //document.getElementById("PlayField").innerHTML = display.map(arr => arr.join('')).join('<br>');
+
+    visibleTiles.forEach(tile => {
+        display[tile.yPos][tile.xPos] = "<font color='#eb4034'>" +  layer1Generator.grid[tile.yPos][tile.xPos].symbol + "</font>";
+    });
+
+    display[layer3Generator.player.yPos][layer3Generator.player.xPos] = "<font color='#FFF700'>@</font>";
     document.getElementById("PlayField").innerHTML = display.map(arr => arr.join('')).join('<br>');
 }
 
@@ -113,12 +109,12 @@ function generateVisibility() {
     const octant4 = generateOctant(layer3Generator.player.xPos, layer3Generator.player.yPos, 15, 3);
     const octant5 = generateOctant(layer3Generator.player.xPos, layer3Generator.player.yPos, 15, 4);
     const octant6 = generateOctant(layer3Generator.player.xPos, layer3Generator.player.yPos, 15, 5);
-    const octant7 = generateOctant(layer3Generator.player.xPos, layer3Generator.player.yPos, 15, 6);
     const octant8 = generateOctant(layer3Generator.player.xPos, layer3Generator.player.yPos, 15, 7);
+    const octant7 = generateOctant(layer3Generator.player.xPos, layer3Generator.player.yPos, 15, 6);
 
-    const visibleTiles = [...octant1, ...octant2, ...octant3, ...octant4, ...octant5, ...octant6, ...octant7, ...octant8]
+    const visibleTiles = [...octant1, ...octant2, ...octant3, ...octant4, ...octant5, ...octant6, ...octant7, ...octant8];
     //filter and return
-    return octant1;
+    return visibleTiles;
 }
 
 //weird artifacting around long walls
@@ -126,69 +122,192 @@ function generateVisibility() {
 
 //will generate a visibility bitmap of octant, point of view being 0,0
 function generateOctant(startXpos, startYpos, length, orientation) {
-    let previousTileOpaque = false;
-    let shadowLevel = 0;
+    console.log("-----------------------------")
+    let inShadow = false;
     const visibleTiles = [];
     const upperShadowSlopes = [];
     const lowerShadowSlopes = [];
+    const shadows = [];
     for (y = 0; y < length; y++) {
-        shadowLevel = 0;
-        previousTileOpaque = false;
-        //let pos = transformOctant(y, 0, orientation);
-        //pos.yPos += startYpos;
+        //inShadow = false;
+        // previousTileOpaque = false;
 
-        //do boundary check here as well when you have function that checks both
-        //x and y for being out of bounds
-
-        for (x = 0; x <= y; x++) {
+        //if theres an upper slope lower than 0, set inshadow to true
+        //else, false
+        if (containsValueBetween(upperShadowSlopes, -10, 0) > -1) {
+            inShadow = true;
+        }
+        else {
+            inShadow = false;
+            //console.log("not in shadow");
+        }
+        for (x = 0; x <= y; x++) {      
             let pos = transformOctant(y, x, orientation);
+            let prevPos = transformOctant(y, x - 1, orientation);
+            let nextPos = transformOctant(y, x + 1, orientation);
             pos.yPos += startYpos;
             pos.xPos += startXpos;
-            //if pos out of bounds, break
-            //TODO: also abstract this with a bounds checking function
+            prevPos.yPos += startYpos;
+            prevPos.xPos += startXpos;
+            nextPos.yPos += startYpos;
+            nextPos.xPos += startXpos;
             if (pos.xPos < 0 || pos.xPos > layer1Generator.columns - 1) break;
             if (pos.yPos < 0 || pos.yPos > layer1Generator.rows - 1) break;
 
-            const currentTileSlope = calculateSlope(0,0,y,x);
-            const previousTileSlope = (x < 1) ? -10 : calculateSlope(0,0,y,x-1);
-
-            if (containsValueBetween(upperShadowSlopes, previousTileSlope, currentTileSlope)) {
-                shadowLevel++;
-            }
-            else if (containsValueBetween(lowerShadowSlopes, previousTileSlope, currentTileSlope)) {
-                shadowLevel--;
-            }
-
-            if (shadowLevel > 0) continue;
-
+            let upperShadowSlope = false;
+            let lowerShadowSlope = false;
+            //make out of bounds function for this
+            const previousTileOpaque = (x > 0) ? layer1Generator.grid[prevPos.yPos][prevPos.xPos].symbol === '#' : false;
+            const nextTileOpaque = (x < y) ? layer1Generator.grid[nextPos.yPos][nextPos.xPos].symbol === '#' : false;
             const currentTileOpaque = layer1Generator.grid[pos.yPos][pos.xPos].symbol === '#';
 
-            //at end of loop set previousTileOpaque to wether current tile is a wall or not
-            //if transition from non-opaque to opaque is found(!previousTileOpaque && currentTileOpaque), calculateUppershadowSlope for current tile
-            if (!previousTileOpaque && currentTileOpaque) {
-                //console.log("entering wall block on Y: " + y + " X: " + x);
-                //calculate upper shadow slope
-                const slope = calculateUpperShadowSlope(y, x);
-                upperShadowSlopes.push(slope);
-            }
-            //if transition from opaque to non-opaque is found(previousTileOpaque && !currentTileOpaque), calculateLowerShadowSlope for current tile - 1 on x coord
-            else if (previousTileOpaque && !currentTileOpaque) {
-                //console.log("exiting wall block on Y: " + y + " X: " + x)
-                //calculate lower shadow slope
-                const slope = calculateLowerShadowSlope(y, x - 1);
-                lowerShadowSlopes.push(slope);
-            }
-            //if opaque tile is found on last x for row, calculateLowerShadowSlope for current tile
-            else if (currentTileOpaque && x === y) {
-                //console.log("wall on last tile of row on Y: " + y + " X: " + x);
-                //calculate lower shadow slope
-                const slope = calculateLowerShadowSlope(y, x);
-                lowerShadowSlopes.push(slope);
+            const lowerTileSlope = calculateLowerShadowSlope(y, x);
+            const upperTileSlope = calculateUpperShadowSlope(y, x);
+
+            const upperShadowIndex = containsValueBetween(upperShadowSlopes, upperTileSlope, lowerTileSlope);
+            if (upperShadowIndex > -1) upperShadowSlope = true;
+
+            const lowerShadowIndex = containsValueBetween(lowerShadowSlopes, upperTileSlope, lowerTileSlope);
+            if (lowerShadowIndex > -1) lowerShadowSlope = true;
+
+            if (upperShadowSlope && !lowerShadowSlope) {
+                //console.log("triggered upslope");
+                if (currentTileOpaque) {
+                    visibleTiles.push(pos);
+                    upperShadowSlopes.splice(upperShadowIndex, 1);
+                    if (!previousTileOpaque) {
+                        upperShadowSlopes.push(upperTileSlope);
+                    }
+                }
+                else {
+                    //do calculations
+                }
+                inShadow = true;
+                //visibletiles push this tile
+                //if current tile is opaque
+                //if previous tile was opaque, do not add a new upper shadow
+                //else, do add new upper shadow
+                //remove upper shadow that triggered this
+
+                //if tile is not opaque
+                //check if shadow covers upper half of this tile
+                //if so, do not draw this tile
+                //else, add to visibletiles
+                
+                //set inshadow to true
             }
 
-            visibleTiles.push(pos);
+            else if (!upperShadowSlope && lowerShadowSlope) {
+                //console.log("triggered lowslope");
+                if (currentTileOpaque) {
+                    visibleTiles.push(pos);
+                    lowerShadowSlopes.splice(lowerShadowIndex, 1);
+                    if (!nextTileOpaque) {
+                        lowerShadowSlopes.push(lowerTileSlope);
+                    }
+                }
+                else {
+                    //do calculations
+                }
+                inShadow = false;
+                //visibletiles push this tile
+                //if current tile is opaque
+                //if next tile is opaque, do not add a new lower shadow
+                //else, do add new lower shadow
+                //remove lower shadow that triggered this.
+                
+                //if tile is not opaque
+                //check if shadow covers lower half of this tile
+                //if so, do not draw this tile
+                //else, add to visibletiles
+                
+                //set inshadow to false
+            }
 
-            previousTileOpaque = currentTileOpaque;
+            //maybe this will become unnecessary afterwards? dunno yet
+            else if (upperShadowSlope && lowerShadowSlope) {
+                //console.log("triggered 2 slopes");
+                visibleTiles.push(pos);
+                //visibletiles add this tile
+                //remove both slopes
+                //set inshadow to true
+                upperShadowSlopes.splice(upperShadowIndex, 1);
+                lowerShadowSlopes.splice(lowerShadowIndex, 1);
+                inShadow = true;
+            }
+
+            else if (!upperShadowSlope && !lowerShadowSlope) {
+                if (inShadow) continue;
+                //visibleTiles.push(pos);
+                
+                if (currentTileOpaque) {
+                    visibleTiles.push(pos);
+                    //console.log(`no slopes found on Y${y} X${x}`);
+                    if (!previousTileOpaque) {
+                        upperShadowSlopes.push(upperTileSlope);
+                    }
+
+                    if (!nextTileOpaque) {
+                        lowerShadowSlopes.push(lowerTileSlope);
+                    }
+                }
+                //if inshadow is false, add this tile to visibletiles
+                //else just skip
+
+                //if current tile is opaque && inshadow is false
+                //visibletiles add this tile
+                //if previous tile was opaque, do not add a new upper shadow
+                //else do
+                //if next tile is opaque, do not add new lower shadow
+                //else do
+                //add new lower shadow
+            }
+
+            // //return;
+
+            // //previoustileopaque should probably be set
+            // //if coming out of a shadow, set previoustileopaque to false?
+            // if (inShadow) {
+            //     previousTileOpaque = false;
+            //     continue;
+            // }
+
+            
+
+            // //at end of loop set previousTileOpaque to wether current tile is a wall or not
+            // //if transition from non-opaque to opaque is found(!previousTileOpaque && currentTileOpaque), calculateUppershadowSlope for current tile
+            // if (!previousTileOpaque && currentTileOpaque) {
+            //     //OR
+
+            //     //check if theres a slope in upper shadow slopes that matches slope of left top side of this tile
+            //     //if there is, remove it, and replace it with upper shadow slope of this tile
+            //     //this makes sure shapes are treated the same as on the x axis
+                
+            //     //console.log("entering wall block on Y: " + y + " X: " + x);
+            //     //calculate upper shadow slope
+            //     const slope = calculateUpperShadowSlope(y, x);
+            //     //onst offset = -0.045;
+            //     // const lowerSlopeIndex = containsValueBetween(lowerShadowSlopes, previousTileSlope, currentTileSlope);
+            //     // if(lowerSlopeIndex > -1) {
+            //     //     console.log("removing lower slope @ Y: " + y + " X: " + x);
+            //     //     lowerShadowSlopes.splice(lowerSlopeIndex, 1);
+            //     //     //TODO AGAINST X-RAY SLOPES
+            //     //     //before you push, check if a lower shadow slope exist in range of this slope.
+            //     //     //if there is, remove slope and dont add this one to list
+            //     // }
+            //     // else {
+            //     // }
+            //     upperShadowSlopes.push(slope);
+            // }
+            // //if transition from opaque to non-opaque is found(previousTileOpaque && !currentTileOpaque), calculateLowerShadowSlope for current tile - 1 on x coord
+            // else if (previousTileOpaque && !currentTileOpaque) {
+            //     const slope = calculateLowerShadowSlope(y, x - 1);
+            //     lowerShadowSlopes.push(slope);
+            // }
+
+            // visibleTiles.push(pos);
+
+            // previousTileOpaque = currentTileOpaque;
         }
 
     }
@@ -238,7 +357,7 @@ function sortedIndex(array, value) {
 function containsValueBetween(array, min, max) {
     for (i = 0; i < array.length; i++) {
         const val = array[i];
-        if (val > min && val <= max) return true;
+        if (val > min && val <= max) return i;
     }
-    return false;
+    return -1;
 }

@@ -138,7 +138,7 @@ Layer3Generator.prototype.attack = function (caller, yPos, xPos) {
 
 Layer3Generator.prototype.addPlayerGold = function (amount) {
     this.player.gold += amount;
-    return `You added ${amount} to your inventory.`;
+    return `You added ${amount} gold to your inventory.`;
 };
 
 Layer3Generator.prototype.setPlayerKey = function (bool) {

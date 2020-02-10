@@ -132,5 +132,4 @@ Goblin.prototype.act = function() {
 //TODO: move to ai actor class or something?
 function moveGoblins() {
     layer3Generator.goblins.forEach(goblin => goblin.act());
-    //drawDisplay();
 }

@@ -18,3 +18,7 @@ Door.prototype.interact = function () {
 
     writeToConsole("You " + (this.open ? "open" : "close") + " the door.");
 };
+
+Door.prototype.isOpaque = function () {
+    return !this.open
+};

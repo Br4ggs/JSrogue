@@ -122,7 +122,7 @@ function generateVisibility() {
 
 //will generate a visibility bitmap of octant, point of view being 0,0
 function generateOctant(startXpos, startYpos, length, orientation) {
-    console.log("-----------------------------")
+    //console.log("-----------------------------")
     let inShadow = false;
     const visibleTiles = [];
     const upperShadowSlopes = [];
@@ -156,10 +156,10 @@ function generateOctant(startXpos, startYpos, length, orientation) {
 
             let upperShadowSlope = false;
             let lowerShadowSlope = false;
-            //make out of bounds function for this
-            const previousTileOpaque = (x > 0) ? layer1Generator.grid[prevPos.yPos][prevPos.xPos].symbol === '#' : false;
-            const nextTileOpaque = (x < y) ? layer1Generator.grid[nextPos.yPos][nextPos.xPos].symbol === '#' : false;
-            const currentTileOpaque = layer1Generator.grid[pos.yPos][pos.xPos].symbol === '#';
+            //seems to work for now
+            const previousTileOpaque = (x > 0) ? isOpaque(prevPos.yPos, prevPos.xPos) : false;
+            const nextTileOpaque = (x < y) ? isOpaque(nextPos.yPos, nextPos.xPos) : false;
+            const currentTileOpaque = isOpaque(pos.yPos, pos.xPos);
 
             const lowerTileSlope = calculateLowerShadowSlope(y, x);
             const upperTileSlope = calculateUpperShadowSlope(y, x);

@@ -16,7 +16,7 @@ var layer3Generator = new Layer3Generator();
  * @returns {boolean} Whether this tile is traverseable or not.
  */
 function isTraverseable(y, x) {
-    if (y < 0 || y > layer1Generator.rows || x < 0 || x > layer1Generator.columns)
+    if (y < 0 || y > layer1Generator.rows - 1 || x < 0 || x > layer1Generator.columns - 1)
         return false;
 
     if (layer2Generator.isOccupied(y, x)) {
@@ -32,6 +32,20 @@ function isTraverseable(y, x) {
 
     //TODO: tiles should have a field for this, shouldn't be dependant on symbol
     return layer1Generator.grid[y][x].symbol === '.';
+}
+
+function isOpaque(y, x) {
+    if (y < 0 || y > layer1Generator.rows - 1 || x < 0 || x > layer1Generator.columns - 1)
+    return false;
+
+    if (layer2Generator.isOccupied(y, x)) {
+        var object = layer2Generator.getObject(y, x);
+        if (object instanceof Door) {
+            return object.isOpaque();
+        }
+    }
+
+    return layer1Generator.grid[y][x].symbol === '#';
 }
 
 /**

@@ -16,7 +16,7 @@ function drawDisplay() {
     //draw these tiles and apply distance modifier to grayscale for a
     //round visibility effect
     
-    //draw explored part op dungeon as dark grey(?)
+    //add visible tiles to visitedtiles list (if not in there already)
 
     const display = [];
     
@@ -32,91 +32,52 @@ function drawDisplay() {
     //visitedtiles
 
     visibleTiles.forEach(tile => {
+        const player = layer3Generator.player;
+        const opacity = ((distance(player.yPos, player.xPos, tile.yPos, tile.xPos)) - 0.0) * (0.5 - 1.0) / (15.0 - 0.0) + 1.0;
+        let hsl;
+        let char;
         if (layer3Generator.isOccupied(tile.yPos, tile.xPos)) {
-            display[tile.yPos][tile.xPos] = "<font color='#68F971'>G</font>";
+            display[tile.yPos][tile.xPos] = `<font style="color:hsl(0,75%,50%,${opacity})">G</font>`;
         }
         else if (layer2Generator.isOccupied(tile.yPos, tile.xPos)) {
             const obj = layer2Generator.getObject(tile.yPos, tile.xPos);
             switch (obj.constructor) {
                 case Key:
-                    display[tile.yPos][tile.xPos] = "<font color='#FF5733'>k</font>";
+                    char = 'k';
+                    hsl = `hsl(11, 100%, 60%, ${opacity})`;
                     break;
                 case Potion:
-                    display[tile.yPos][tile.xPos] = "<font color='#F033F2'>p</font>";
+                    char = 'p';
+                    hsl = `hsl(299, 88%, 57%, ${opacity})`;
                     break;
                 case GoldSack:
-                    display[tile.yPos][tile.xPos] = "<font color='#FFC300'>g</font>";
+                    char = 'g';
+                    hsl = `hsl(46, 100%, 50%, ${opacity})`;
                     break;
                 case Door:
-                    display[tile.yPos][tile.xPos] = "<font color='#9F7640'>" + (obj.open ? '-' : '+') + "</font>";
+                    char = (obj.open ? '-' : '+');
+                    hsl = `hsl(34, 43%, 44%, ${opacity})`;
                     break;
                 case StairCase:
-                    display[tile.yPos][tile.xPos] = "<font color='#E23D23'>" + (this.direction ? 'U' : 'D') + "</font>"
+                    char = (this.direction ? 'U' : 'D');
+                    hsl = `hsl(0,75%,50%,${opacity})`;
                     break;
             }
         }
         else {
-            display[tile.yPos][tile.xPos] = layer1Generator.grid[tile.yPos][tile.xPos].symbol;
+            char = layer1Generator.grid[tile.yPos][tile.xPos].symbol;
+            hsl = `hsl(0,100%,100%,${opacity})`;
+            //display[tile.yPos][tile.xPos] = layer1Generator.grid[tile.yPos][tile.xPos].symbol;
         }
+        display[tile.yPos][tile.xPos] = `<font style="color:${hsl}">${char}</font>`
     });
 
-    display[layer3Generator.player.yPos][layer3Generator.player.xPos] = "<font color='#FFF700'>@</font>";
+    display[layer3Generator.player.yPos][layer3Generator.player.xPos] = `<font style="color:hsl(55, 75%, 50%, 1)">@</font>`;
 
     if (uiState === "SELECT") {
         display[yCursorPos][xCursorPos] = "<mark>!</mark>";
     }
 
-    document.getElementById("PlayField").innerHTML = display.map(arr => arr.join('')).join('<br>');
-
-    return
-    //old stuff
-    // for (y = 0; y < layer1Generator.rows; y++) {
-    //     display[y] = [];
-    //     for (x = 0; x < layer1Generator.columns; x++) {
-    //         display[y][x] = layer1Generator.grid[y][x].symbol;
-    //         if (display[y][x] === '#') {
-    //             display[y][x] = '&block;';
-    //         }
-    //     }
-    // }
-
-    layer2Generator.items.forEach(item => {
-        switch (item.constructor) {
-            case Key:
-                display[item.yPos][item.xPos] = "<font color='#FF5733'>k</font>";
-                break;
-            case Potion:
-                display[item.yPos][item.xPos] = "<font color='#F033F2'>p</font>";
-                break;
-            case GoldSack:
-                display[item.yPos][item.xPos] = "<font color='#FFC300'>g</font>";
-                break;
-        }
-    });
-
-    layer2Generator.doors.forEach(door => {
-        display[door.yPos][door.xPos] = "<font color='#9F7640'>" + (door.open ? '-' : '+') + "</font>";
-    });
-
-    display[layer2Generator.upStairCase.yPos][layer2Generator.upStairCase.xPos] = "<font color='#E23D23'>U</font>";
-    display[layer2Generator.downStairCase.yPos][layer2Generator.downStairCase.xPos] = "<font color='#E23D23'>D</font>";
-
-    display[layer3Generator.player.yPos][layer3Generator.player.xPos] = "<font color='#FFF700'>@</font>";
-
-    layer3Generator.goblins.forEach(goblin =>
-        display[goblin.yPos][goblin.xPos] = "<font color='#68F971'>G</font>");
-
-    if (uiState === "SELECT") {
-        display[yCursorPos][xCursorPos] = "<mark>!</mark>";
-    }
-
-    //document.getElementById("PlayField").innerHTML = display.map(arr => arr.join('')).join('<br>');
-
-    visibleTiles.forEach(tile => {
-        display[tile.yPos][tile.xPos] = "<font color='#eb4034'>" +  layer1Generator.grid[tile.yPos][tile.xPos].symbol + "</font>";
-    });
-
-    display[layer3Generator.player.yPos][layer3Generator.player.xPos] = "<font color='#FFF700'>@</font>";
     document.getElementById("PlayField").innerHTML = display.map(arr => arr.join('')).join('<br>');
 }
 

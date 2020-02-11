@@ -57,6 +57,8 @@ function generateLevel() {
     layer2Generator.generateLayer();
     layer3Generator.generateLayer();
 
+    uiInit();
+    ioInit();
     drawDisplay();
     drawHealthIndicator();
 }

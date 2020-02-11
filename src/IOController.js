@@ -8,7 +8,7 @@ var uiState;
 var xCursorPos;
 var yCursorPos;
 
-function initialize() {
+function ioInit() {
     document.onkeydown = function (keyEvent) {
         var key = String.fromCharCode(keyEvent.keyCode);
         if (keyMap.has(key)) {
@@ -18,8 +18,6 @@ function initialize() {
 
     setMoveMode();
 }
-
-window.addEventListener('load', initialize);
 
 function registerKey(key, func, descr) {
     keyMap.set(key, func);

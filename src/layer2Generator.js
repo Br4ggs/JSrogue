@@ -126,6 +126,8 @@ Layer2Generator.prototype.getObject = function (yPos, xPos) {
     if (this.doors.filter(door => (door.yPos === yPos && door.xPos === xPos)).length > 0) {
         return this.doors.filter(door => (door.yPos === yPos && door.xPos === xPos))[0];
     }
+    
+    return null;
 };
 
 Layer2Generator.prototype.registerObject = function (addedItem) {

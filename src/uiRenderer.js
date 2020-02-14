@@ -93,6 +93,7 @@ function drawDisplay() {
         }
         else {
             char = layer1Generator.grid[tile.yPos][tile.xPos].symbol;
+            if(char === '#') char = '&block;';
             hue = 0;
             saturation = "100%";
             lightness = "100%";

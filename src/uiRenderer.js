@@ -2,10 +2,24 @@
  * The uiRenderer is responsible for drawing the game on the screen/canvas
  */
 const maxConsoleLines = 5;
-const visitedTiles = [];
+//TODO: turn into map object
+const visitedTiles = new Map();
+const display = [];
 
 //TODO: game state should not store ascii representation of tiles
 //TODO: retrieving tiles should be abstracted through functions on a state manager
+
+function uiInit() {
+    //refresh display area
+    for (y = 0; y < layer1Generator.rows; y++) {
+        display[y] = [];
+        for (x = 0; x < layer1Generator.columns; x++) {
+            //if tile is in seen tiles list, display it as dark grey
+            //display[y][x] = {char: ' ', hsl: null, opacity: 0.0};
+            display[y][x] = ' ';
+        }
+    }
+}
 
 /**
  * Updates the main viewport to show the latest data from the multiple dungeon layers
@@ -13,63 +27,85 @@ const visitedTiles = [];
 function drawDisplay() {
 
     const visibleTiles = generateVisibility();
-    //draw these tiles and apply distance modifier to grayscale for a
-    //round visibility effect
-    
-    //add visible tiles to visitedtiles list (if not in there already)
 
-    const display = [];
-    
-    //refresh display area
-    for (y = 0; y < layer1Generator.rows; y++) {
-        display[y] = [];
-        for (x = 0; x < layer1Generator.columns; x++) {
-            //if tile is in seen tiles list, display it as dark grey
-            display[y][x] = ' ';
-        }
-    }
+    //might optimize later
+    visitedTiles.forEach((value, key) => {
+        const pos = key.split("-");
+        display[pos[0]][pos[1]] = value;
+    });
 
-    //visitedtiles
-
+    //then draw currently visible tiles, also update visited tiles
     visibleTiles.forEach(tile => {
         const player = layer3Generator.player;
-        const opacity = ((distance(player.yPos, player.xPos, tile.yPos, tile.xPos)) - 0.0) * (0.5 - 1.0) / (15.0 - 0.0) + 1.0;
+        //map distance from max octant length to 1 to 0.5
+        const opacity = 1 - (distance(player.yPos, player.xPos, tile.yPos, tile.xPos) * (1.0 - 0.25) / (28.0));
         let hsl;
+        let hue;
+        let saturation;
+        let lightness;
         let char;
         if (layer3Generator.isOccupied(tile.yPos, tile.xPos)) {
-            display[tile.yPos][tile.xPos] = `<font style="color:hsl(0,75%,50%,${opacity})">G</font>`;
+            char = 'G';
+            hue = 110;
+            saturation = "50%";
+            lightness = "50%";
+            //display[tile.yPos][tile.xPos] = `<font style="color:hsl(0,75%,50%,${opacity})">G</font>`;
         }
         else if (layer2Generator.isOccupied(tile.yPos, tile.xPos)) {
             const obj = layer2Generator.getObject(tile.yPos, tile.xPos);
             switch (obj.constructor) {
                 case Key:
                     char = 'k';
-                    hsl = `hsl(11, 100%, 60%, ${opacity})`;
+                    hue = 11;
+                    saturation = "100%";
+                    lightness = "60%";
+                    //hsl = `hsl(11, 100%, 60%, ${opacity})`;
                     break;
                 case Potion:
                     char = 'p';
-                    hsl = `hsl(299, 88%, 57%, ${opacity})`;
+                    hue = 299;
+                    saturation = "88%";
+                    lightness = "57%";
+                    //hsl = `hsl(299, 88%, 57%, ${opacity})`;
                     break;
                 case GoldSack:
                     char = 'g';
-                    hsl = `hsl(46, 100%, 50%, ${opacity})`;
+                    hue = 46;
+                    saturation = "100%";
+                    lightness = "50%";
+                    //hsl = `hsl(46, 100%, 50%, ${opacity})`;
                     break;
                 case Door:
                     char = (obj.open ? '-' : '+');
-                    hsl = `hsl(34, 43%, 44%, ${opacity})`;
+                    hue = 34;
+                    saturation = "43%";
+                    lightness = "44%";
+                    //hsl = `hsl(34, 43%, 44%, ${opacity})`;
                     break;
                 case StairCase:
                     char = (this.direction ? 'U' : 'D');
-                    hsl = `hsl(0,75%,50%,${opacity})`;
+                    hue = 0;
+                    saturation = "75%";
+                    lightness = "50%";
+                    //hsl = `hsl(0,75%,50%,${opacity})`;
                     break;
             }
         }
         else {
             char = layer1Generator.grid[tile.yPos][tile.xPos].symbol;
-            hsl = `hsl(0,100%,100%,${opacity})`;
-            //display[tile.yPos][tile.xPos] = layer1Generator.grid[tile.yPos][tile.xPos].symbol;
+            hue = 0;
+            saturation = "100%";
+            lightness = "100%";
+            //hsl = `hsl(0,100%,100%,${opacity})`;
         }
-        display[tile.yPos][tile.xPos] = `<font style="color:${hsl}">${char}</font>`
+
+        visitedTiles.set(`${tile.yPos}-${tile.xPos}`, `<font style="color:hsl(${hue},${saturation},${lightness},0.25)">${char}</font>`);
+        //if (visitedTiles.has(`${tile.yPos}${tile.xPos}`) && )
+        //set visitedtiles here
+        //if visitedtiles does not contain this tile or the char is different, (re-add it)
+        //display[tile.yPos][tile.xPos] = `<font style="color:${hsl}">${char}</font>`
+        //console.log(opacity)
+        display[tile.yPos][tile.xPos] = `<font style="color:hsl(${hue},${saturation},${lightness},${opacity})">${char}</font>`;
     });
 
     display[layer3Generator.player.yPos][layer3Generator.player.xPos] = `<font style="color:hsl(55, 75%, 50%, 1)">@</font>`;

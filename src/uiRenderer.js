@@ -2,7 +2,6 @@
  * The uiRenderer is responsible for drawing the game on the screen/canvas
  */
 const maxConsoleLines = 5;
-//TODO: turn into map object
 const visitedTiles = new Map();
 const display = [];
 
@@ -11,11 +10,10 @@ const display = [];
 
 function uiInit() {
     //refresh display area
+    visitedTiles.clear();
     for (y = 0; y < layer1Generator.rows; y++) {
         display[y] = [];
         for (x = 0; x < layer1Generator.columns; x++) {
-            //if tile is in seen tiles list, display it as dark grey
-            //display[y][x] = {char: ' ', hsl: null, opacity: 0.0};
             display[y][x] = ' ';
         }
     }
@@ -25,7 +23,6 @@ function uiInit() {
  * Updates the main viewport to show the latest data from the multiple dungeon layers
  */
 function drawDisplay() {
-
     const visibleTiles = generateVisibility();
 
     //might optimize later
@@ -49,7 +46,6 @@ function drawDisplay() {
             hue = 110;
             saturation = "50%";
             lightness = "50%";
-            //display[tile.yPos][tile.xPos] = `<font style="color:hsl(0,75%,50%,${opacity})">G</font>`;
         }
         else if (layer2Generator.isOccupied(tile.yPos, tile.xPos)) {
             const obj = layer2Generator.getObject(tile.yPos, tile.xPos);
@@ -59,35 +55,30 @@ function drawDisplay() {
                     hue = 11;
                     saturation = "100%";
                     lightness = "60%";
-                    //hsl = `hsl(11, 100%, 60%, ${opacity})`;
                     break;
                 case Potion:
                     char = 'p';
                     hue = 299;
                     saturation = "88%";
                     lightness = "57%";
-                    //hsl = `hsl(299, 88%, 57%, ${opacity})`;
                     break;
                 case GoldSack:
                     char = 'g';
                     hue = 46;
                     saturation = "100%";
                     lightness = "50%";
-                    //hsl = `hsl(46, 100%, 50%, ${opacity})`;
                     break;
                 case Door:
                     char = (obj.open ? '-' : '+');
                     hue = 34;
                     saturation = "43%";
                     lightness = "44%";
-                    //hsl = `hsl(34, 43%, 44%, ${opacity})`;
                     break;
                 case StairCase:
-                    char = (this.direction ? 'U' : 'D');
+                    char = (obj.direction ? 'U' : 'D');
                     hue = 0;
                     saturation = "75%";
                     lightness = "50%";
-                    //hsl = `hsl(0,75%,50%,${opacity})`;
                     break;
             }
         }
@@ -97,15 +88,9 @@ function drawDisplay() {
             hue = 0;
             saturation = "100%";
             lightness = "100%";
-            //hsl = `hsl(0,100%,100%,${opacity})`;
         }
 
         visitedTiles.set(`${tile.yPos}-${tile.xPos}`, `<font style="color:hsl(${hue},${saturation},${lightness},0.25)">${char}</font>`);
-        //if (visitedTiles.has(`${tile.yPos}${tile.xPos}`) && )
-        //set visitedtiles here
-        //if visitedtiles does not contain this tile or the char is different, (re-add it)
-        //display[tile.yPos][tile.xPos] = `<font style="color:${hsl}">${char}</font>`
-        //console.log(opacity)
         display[tile.yPos][tile.xPos] = `<font style="color:hsl(${hue},${saturation},${lightness},${opacity})">${char}</font>`;
     });
 

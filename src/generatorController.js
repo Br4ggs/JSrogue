@@ -9,6 +9,8 @@ var layer1Generator = new Layer1Generator();
 var layer2Generator = new Layer2Generator();
 var layer3Generator = new Layer3Generator();
 
+var refreshPathing = false;
+
 /**
  * Checks whether the given tile is traverseable by entities.
  * @param {int} y The row of the tile.

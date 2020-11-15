@@ -15,10 +15,6 @@ Item.prototype.interact = function () {
     layer2Generator.removeObject(this);
 }
 
-//TODO: maybe give item prototype.interact function that removes item from playfield?
-
-//TODO: ask david if this Potion.prototype = Item.prototype is okay?
-
 //How do i get all item variables and functions in item instead of potion
 var Potion = function (yPos, xPos, hp) {
     Item.call(this, yPos, xPos, "a health potion healing " + hp + " hitpoints.");

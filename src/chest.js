@@ -1,3 +1,5 @@
+//deprecated, do not use
+
 var Chest = function (yPos, xPos, item) {
     this.yPos = yPos;
     this.xPos = xPos;

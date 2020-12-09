@@ -7,8 +7,12 @@ var Goblin = function(yPos,xPos) {
     this.health = this.maxHealth;
     this.attackPwr = 1;
 
+    this.chasingPlayer = false;
     this.roamTargetY = yPos;
     this.roamTargetX = xPos;
+
+    this.setNewRoamTarget();
+    this.pathToRoamTarget = this.getPathTo(this.roamTargetY, this.roamTargetX);
 
     this.blockCounter = 0;
     this.maxBlockCounter = 3;
@@ -96,11 +100,41 @@ Goblin.prototype.getReachableTiles = function(yPos, xPos) {
 }
 
 Goblin.prototype.act = function() {
-    const {yPos, xPos} = layer3Generator.player;
-    let path = this.getPathTo(yPos, xPos);
-    let nextStep = path[[this.yPos, this.xPos]];
+    let path;
+    let nextStep;
+    
+    if(refreshPathing)
+    {
+        const {yPos, xPos} = layer3Generator.player;
+        path = this.getPathTo(yPos, xPos);
+        nextStep = path[[this.yPos, this.xPos]];
+        if(nextStep === undefined)
+        {
+            this.chasingPlayer = false;
+        }
+        else
+        {
+            this.chasingPlayer = true;
+        }
 
-    if(nextStep !== undefined) {
+        if(!this.chasingPlayer)
+        {
+            this.pathToRoamTarget = this.getPathTo(this.roamTargetY, this.roamTargetX);
+            nextStep = this.pathToRoamTarget[[this.yPos, this.xPos]];
+            if(nextStep === undefined)
+            {
+                this.setNewRoamTarget();
+                this.pathToRoamTarget = this.getPathTo(this.roamTargetY, this.roamTargetX);
+            }
+        }
+    }
+
+    if(this.chasingPlayer)
+    {
+        const {yPos, xPos} = layer3Generator.player;
+        path = this.getPathTo(yPos, xPos); //this only needs to be checked when a player opens/closes a door
+        nextStep = path[[this.yPos, this.xPos]];
+
         if(distance(this.yPos, this.xPos, layer3Generator.player.yPos, layer3Generator.player.xPos) === 1){
             layer3Generator.attack(this, layer3Generator.player.yPos, layer3Generator.player.xPos);
         }
@@ -108,20 +142,17 @@ Goblin.prototype.act = function() {
             ({yPos : this.yPos, xPos : this.xPos} = nextStep);
         }
     }
-    else {
-        console.log("cannot find path to player");
-        // OR getpathto target returns undefined
-        //TODO: this path should only be calculated once
-        path = this.getPathTo(this.roamTargetY, this.roamTargetX);
-        nextStep = path[[this.yPos, this.xPos]];
+    else
+    {
+        nextStep = this.pathToRoamTarget[[this.yPos, this.xPos]];
 
         if(distance(this.yPos, this.xPos, this.roamTargetY, this.roamTargetX) <= 1 || nextStep === undefined || this.blockCounter >= this.maxBlockCounter) {
             this.blockCounter = 0;
             this.setNewRoamTarget();
+            this.pathToRoamTarget = this.getPathTo(this.roamTargetY, this.roamTargetX);
         }
         else if(layer3Generator.isOccupied(nextStep.yPos, nextStep.xPos)) {
             this.blockCounter++;
-            console.log("added to counter");
         }
         else {
             ({yPos : this.yPos, xPos : this.xPos} = nextStep);
@@ -131,7 +162,5 @@ Goblin.prototype.act = function() {
 
 //TODO: move to ai actor class or something?
 function moveGoblins() {
-    console.log("doot");
     layer3Generator.goblins.forEach(goblin => goblin.act());
-    drawDisplay();
 }

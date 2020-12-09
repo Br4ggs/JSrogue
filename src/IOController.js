@@ -8,7 +8,7 @@ var uiState;
 var xCursorPos;
 var yCursorPos;
 
-function initialize() {
+function ioInit() {
     document.onkeydown = function (keyEvent) {
         var key = String.fromCharCode(keyEvent.keyCode);
         if (keyMap.has(key)) {
@@ -18,8 +18,6 @@ function initialize() {
 
     setMoveMode();
 }
-
-window.addEventListener('load', initialize);
 
 function registerKey(key, func, descr) {
     keyMap.set(key, func);
@@ -89,13 +87,18 @@ function moveCursor(yDir, xDir) {
     drawDisplay();
 }
 
-//TODO: rework chests into simple items laying on the ground
-//you can pick them up manually but they will automatically be picked up as soon as you walk over them
-
 //TODO: this could be turned into a tryMoveAction object
 function tryPlayerMove(yDir, xDir) {
+    refreshPathing = false;
+
     var result = layer3Generator.moveEntity(yDir, xDir);
     if (result) {
+        if (layer2Generator.isOccupied(layer3Generator.player.yPos, layer3Generator.player.xPos)) {
+            const obj = layer2Generator.getObject(layer3Generator.player.yPos, layer3Generator.player.xPos);
+            if (obj instanceof Item) {
+                playerInteract(layer3Generator.player.yPos, layer3Generator.player.xPos);
+            }
+        }
         moveGoblins();
         drawDisplay();
         drawHealthIndicator();
@@ -123,6 +126,8 @@ function tryPlayerMove(yDir, xDir) {
 }
 
 function playerInspect(yPos, xPos) {
+    refreshPathing = false;
+
     var result = layer3Generator.inspect(yPos, xPos);
     if (!result) {
         writeToConsole("Nothing to see here...");
@@ -130,6 +135,8 @@ function playerInspect(yPos, xPos) {
 }
 
 function playerInteract(yPos, xPos) {
+    refreshPathing = false;
+
     if (distance(layer3Generator.player.yPos, layer3Generator.player.xPos, yPos, xPos) > 1.5) {
         writeToConsole("That object is too far away...");
         return;
@@ -146,6 +153,8 @@ function playerInteract(yPos, xPos) {
 }
 
 function playerAttack(yPos, xPos) {
+    refreshPathing = false;
+
     if (distance(layer3Generator.player.yPos, layer3Generator.player.xPos, yPos, xPos) > 1.5) {
         writeToConsole("That is too far away...");
         return;
@@ -168,7 +177,7 @@ function showInventory() {
 
 function gameOver() {
     clearMap();
-    registerKey('R', () => null, "Restart");
+    registerKey('R', () => restart(), "Restart");
     writeToConsole("You died, press R to restart");
     drawDisplay();
     drawHealthIndicator();

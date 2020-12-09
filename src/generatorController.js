@@ -9,6 +9,8 @@ var layer1Generator = new Layer1Generator();
 var layer2Generator = new Layer2Generator();
 var layer3Generator = new Layer3Generator();
 
+var refreshPathing = false;
+
 /**
  * Checks whether the given tile is traverseable by entities.
  * @param {int} y The row of the tile.
@@ -16,7 +18,7 @@ var layer3Generator = new Layer3Generator();
  * @returns {boolean} Whether this tile is traverseable or not.
  */
 function isTraverseable(y, x) {
-    if (y < 0 || y > layer1Generator.rows || x < 0 || x > layer1Generator.columns)
+    if (y < 0 || y > layer1Generator.rows - 1 || x < 0 || x > layer1Generator.columns - 1)
         return false;
 
     if (layer2Generator.isOccupied(y, x)) {
@@ -34,6 +36,20 @@ function isTraverseable(y, x) {
     return layer1Generator.grid[y][x].symbol === '.';
 }
 
+function isOpaque(y, x) {
+    if (y < 0 || y > layer1Generator.rows - 1 || x < 0 || x > layer1Generator.columns - 1)
+    return false;
+
+    if (layer2Generator.isOccupied(y, x)) {
+        var object = layer2Generator.getObject(y, x);
+        if (object instanceof Door) {
+            return object.isOpaque();
+        }
+    }
+
+    return layer1Generator.grid[y][x].symbol === '#';
+}
+
 /**
  * Initial function that generates the maze.
  * Gets called when the window is completely loaded.
@@ -43,6 +59,8 @@ function generateLevel() {
     layer2Generator.generateLayer();
     layer3Generator.generateLayer();
 
+    uiInit();
+    ioInit();
     drawDisplay();
     drawHealthIndicator();
 }
@@ -50,19 +68,24 @@ function generateLevel() {
 //Really lazy but this is gonna get overhauled anyway
 function nextLevel() {
     const playerData = layer3Generator.player;
-    console.log(playerData);
     layer1Generator = new Layer1Generator();
     layer2Generator = new Layer2Generator();
     layer3Generator = new Layer3Generator();
 
     generateLevel();
-    console.log(playerData);
-
 
     layer3Generator.player.id = playerData.id;
     layer3Generator.player.health = playerData.health;
     layer3Generator.player.gold = playerData.gold;
-    writeToConsole("The staircase locks behind you.")
+    writeToConsole("The staircase locks behind you.");
+}
+
+function restart() {
+    layer1Generator = new Layer1Generator();
+    layer2Generator = new Layer2Generator();
+    layer3Generator = new Layer3Generator();
+    generateLevel();
+    setMoveMode();
 }
 
 window.addEventListener('load', generateLevel);

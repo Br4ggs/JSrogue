@@ -57,7 +57,9 @@ Layer3Generator.prototype.isOccupied = function (yPos, xPos) {
     if (this.goblins.filter(goblin => (goblin.yPos === yPos && goblin.xPos === xPos)).length > 0) {
         return true;
     }
-}
+
+    return false;
+};
 
 Layer3Generator.prototype.getEntity = function (yPos, xPos) {
     if (this.player.yPos === yPos && this.player.xPos === xPos){
@@ -67,8 +69,11 @@ Layer3Generator.prototype.getEntity = function (yPos, xPos) {
     if (filteredGoblins.length === 1) {
         return filteredGoblins[0];
     }
-}
+    
+    return null;
+};
 
+//TODO: these need to be general methods, not just for player
 Layer3Generator.prototype.moveEntity = function (yDir, xDir) {
     return this.setPosition(this.player.yPos + yDir, this.player.xPos + xDir);
 };
@@ -133,11 +138,11 @@ Layer3Generator.prototype.attack = function (caller, yPos, xPos) {
     else {
         return false;
     }
-}
+};
 
 Layer3Generator.prototype.addPlayerGold = function (amount) {
     this.player.gold += amount;
-    return `You added ${amount} to your inventory.`;
+    return `You added ${amount} gold to your inventory.`;
 };
 
 Layer3Generator.prototype.setPlayerKey = function (bool) {

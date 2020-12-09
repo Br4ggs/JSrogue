@@ -2,15 +2,16 @@
  * The uiRenderer is responsible for drawing the game on the screen/canvas
  */
 const maxConsoleLines = 5;
-const visitedTiles = new Map();
+const prevVisibleTiles = new Map();
 const display = [];
+
 
 //TODO: game state should not store ascii representation of tiles
 //TODO: retrieving tiles should be abstracted through functions on a state manager
 
 function uiInit() {
     //refresh display area
-    visitedTiles.clear();
+    prevVisibleTiles.clear();
     for (y = 0; y < layer1Generator.rows; y++) {
         display[y] = [];
         for (x = 0; x < layer1Generator.columns; x++) {
@@ -25,18 +26,18 @@ function uiInit() {
 function drawDisplay() {
     const visibleTiles = generateVisibility();
 
-    //might optimize later
-    visitedTiles.forEach((value, key) => {
+    prevVisibleTiles.forEach((value, key) => {
         const pos = key.split("-");
         display[pos[0]][pos[1]] = value;
     });
 
-    //then draw currently visible tiles, also update visited tiles
+    prevVisibleTiles.clear();
+
+    //then draw currently visible tiles, also update previously visited tiles
     visibleTiles.forEach(tile => {
         const player = layer3Generator.player;
-        //map distance from max octant length to 1 to 0.5
+        //map distance from max octant length to 1 to 0.25
         const opacity = 1 - (distance(player.yPos, player.xPos, tile.yPos, tile.xPos) * (1.0 - 0.25) / (28.0));
-        let hsl;
         let hue;
         let saturation;
         let lightness;
@@ -90,8 +91,8 @@ function drawDisplay() {
             lightness = "100%";
         }
 
-        visitedTiles.set(`${tile.yPos}-${tile.xPos}`, `<font style="color:hsl(${hue},${saturation},${lightness},0.25)">${char}</font>`);
         display[tile.yPos][tile.xPos] = `<font style="color:hsl(${hue},${saturation},${lightness},${opacity})">${char}</font>`;
+        prevVisibleTiles.set(`${tile.yPos}-${tile.xPos}`, `<font style="color:hsl(${hue},${saturation},${lightness},0.25)">${char}</font>`);
     });
 
     display[layer3Generator.player.yPos][layer3Generator.player.xPos] = `<font style="color:hsl(55, 75%, 50%, 1)">@</font>`;
